@@ -30,6 +30,9 @@ fi
 if [[ `grep -c "openwrt_x" /etc/opkg/distfeeds.conf` -ge '1' ]]; then
 	sed -i '/openwrt_x/d' /etc/opkg/distfeeds.conf
 fi
+if [[ `grep -c "nikki" /etc/opkg/distfeeds.conf` -ge '1' ]]; then
+	sed -i 'nikki/d' /etc/opkg/distfeeds.conf
+fi
 
 if [[ `grep -c "dns_redirect" /etc/config/dhcp` -ge '1' ]]; then
 	service dnsmasq stop
