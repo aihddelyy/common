@@ -9,7 +9,7 @@ cd ${GITHUB_WORKSPACE}
 if [[ -n "${BENDI_VERSION}" ]]; then
   sudo rm -rf build common.sh
 else
-  sudo rm -rf build/common && git clone -b main --depth 1 https://github.com/281677160/common build/common
+  sudo rm -rf build/common && git clone -b main --depth 1 https://github.com/aihddelyy/common build/common
   cp -Rf build/common/*.sh build/${FOLDER_NAME}/
   cp -Rf build/common/common.sh build/${FOLDER_NAME}/common.sh
   cp -Rf build/common/upgrade.sh build/${FOLDER_NAME}/upgrade.sh
@@ -25,7 +25,7 @@ if [[ -n "${BENDI_VERSION}" ]]; then
 else
   git clone -b main https://user:${REPO_TOKEN}@github.com/${GIT_REPOSITORY}.git repogx
 fi
-git clone -b main --depth 1 https://github.com/281677160/build-actions shangyou
+git clone -b main --depth 1 https://github.com/aihddelyy/build-actions shangyou
 
 if [[ ! -d "repogx" ]]; then
   echo -e "\033[31m 本地仓库下载错误 \033[0m"
