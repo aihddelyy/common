@@ -1130,8 +1130,8 @@ cd ${HOME_PATH}
 ./scripts/feeds install -a
 
 # 修改nikki升级保留文件列表
-echo "修改nikki升级保留文件列表"
-echo "/etc/mihomo/run/cache.db" >> "feeds/nikki/nikki/files/nikki.upgrade"
+echo "正在执行：修改nikki升级保留文件列表"
+echo "/etc/nikki/run/cache.db" >> "feeds/nikki/nikki/files/nikki.upgrade"
 
 if [[ ! -f "${HOME_PATH}/staging_dir/host/bin/upx" ]]; then
   cp -Rf /usr/bin/upx ${HOME_PATH}/staging_dir/host/bin/upx
