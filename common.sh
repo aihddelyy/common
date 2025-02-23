@@ -1129,6 +1129,10 @@ echo "正在执行：安装feeds,请耐心等待..."
 cd ${HOME_PATH}
 ./scripts/feeds install -a
 
+# 修改nikki升级保留文件列表
+echo "修改nikki升级保留文件列表"
+echo "/etc/mihomo/run/cache.db" >> "feeds/nikki/nikki/files/nikki.upgrade"
+
 if [[ ! -f "${HOME_PATH}/staging_dir/host/bin/upx" ]]; then
   cp -Rf /usr/bin/upx ${HOME_PATH}/staging_dir/host/bin/upx
   cp -Rf /usr/bin/upx-ucl ${HOME_PATH}/staging_dir/host/bin/upx-ucl
