@@ -21,8 +21,8 @@ function Diy_Part1() {
 function Diy_Part2() {
 	export Update_tag="Update-${TARGET_BOARD}"
 	export In_Firmware_Info="$FILES_PATH/etc/openwrt_update"
-	export Github_API1="https://github.com/${GIT_REPOSITORY}/releases/download/${Update_tag}/zzz_api"
-	export Github_API2="https://gh-proxy.com/https://github.com/${GIT_REPOSITORY}/releases/download/${Update_tag}/zzz_api"
+	export Github_API1="${GITHUB_LINK}/releases/download/${Update_tag}/zzz_api"
+	export Github_API2="https://gh-proxy.com/${GITHUB_LINK}/releases/download/${Update_tag}/zzz_api"
 	export API_PATH="/tmp/Downloads/zzz_api"
 	export Release_download1="${GITHUB_LINK}/releases/download/${Update_tag}"
 	export Release_download2="https://gh-proxy.com/${GITHUB_LINK}/releases/download/${Update_tag}"
