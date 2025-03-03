@@ -1132,6 +1132,10 @@ cd ${HOME_PATH}
 # 修改nikki升级保留文件列表
 echo "正在执行：修改nikki升级保留文件列表"
 echo "/etc/nikki/run/cache.db" >> "feeds/nikki/nikki/files/nikki.upgrade"
+echo "/etc/nikki/run/ui/" >> "feeds/nikki/nikki/files/nikki.upgrade"
+echo "/etc/nikki/run/proxies/" >> "feeds/nikki/nikki/files/nikki.upgrade"
+echo "/etc/nikki/run/rules/" >> "feeds/nikki/nikki/files/nikki.upgrade"
+
 
 if [[ ! -f "${HOME_PATH}/staging_dir/host/bin/upx" ]]; then
   cp -Rf /usr/bin/upx ${HOME_PATH}/staging_dir/host/bin/upx
