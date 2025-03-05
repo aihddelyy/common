@@ -657,7 +657,6 @@ cd ${HOME_PATH}
     rm -rf ${HOME_PATH}/feeds/routing/bmx6
     cp -Rf ${HOME_PATH}/build/common/Share/bmx6 ${HOME_PATH}/feeds/routing/bmx6
   fi
-fi
 }
 
 
