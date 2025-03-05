@@ -434,6 +434,7 @@ OFFICIAL)
       rm -rf ${HOME_PATH}/feeds/packages/lang/perl-parse-yapp
       cp -Rf ${HOME_PATH}/build/common/Share/perl-parse-yapp ${HOME_PATH}/feeds/packages/lang/perl-parse-yapp
     fi
+  fi
 ;;
 XWRT)
   s="luci-app-wrtbwmon,wrtbwmon,luci-app-dockerman,docker,dockerd,bcm27xx-userland,luci-app-aliyundrive-webdav,aliyundrive-webdav,aliyundrive-fuse"
@@ -721,7 +722,7 @@ if [[ -d "${HOME_PATH}/feeds/passwall3" ]]; then
 fi
 # 更换golang版本
 rm -rf ${HOME_PATH}/feeds/packages/lang/golang
-git clone https://github.com/sbwml/packages_lang_golang -b 21.x ${HOME_PATH}/feeds/packages/lang/golang
+git clone https://github.com/sbwml/packages_lang_golang -b 24.x ${HOME_PATH}/feeds/packages/lang/golang
 }
 
 
