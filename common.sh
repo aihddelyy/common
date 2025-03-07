@@ -540,6 +540,7 @@ elif [[ -z "${Settings_path}" ]] && [[ "${LUCI_BANBEN}" == "1" ]]; then
   cp -Rf ${HOME_PATH}/build/common/Share/default-settings1 ${HOME_PATH}/package/default-settings
 fi
 
+
 ZZZ_PATH="$(find "${HOME_PATH}/package" -type f -name "*-default-settings" |grep files)"
 if [[ -n "${ZZZ_PATH}" ]]; then  
   echo "ZZZ_PATH=${ZZZ_PATH}" >> ${GITHUB_ENV}
@@ -613,12 +614,13 @@ fi
 # 修改一些依赖
 case "${SOURCE_CODE}" in
 XWRT|OFFICIAL)
+  echo "11"
   if [[ -n "$(grep "libustream-wolfssl" ${HOME_PATH}/include/target.mk)" ]]; then
     sed -i 's?libustream-wolfssl?libustream-openssl?g' "${HOME_PATH}/include/target.mk"
   elif [[ -z "$(grep "libustream-openssl" ${HOME_PATH}/include/target.mk)" ]]; then
     sed -i 's?DEFAULT_PACKAGES:=?DEFAULT_PACKAGES:=libustream-openssl ?g' "${HOME_PATH}/include/target.mk"
   fi
-
+  echo "22"
   if [[ -n "$(grep "dnsmasq" ${HOME_PATH}/include/target.mk)" ]] && [[ -z "$(grep "dnsmasq-full" ${HOME_PATH}/include/target.mk)" ]]; then
     sed -i 's?dnsmasq?dnsmasq-full luci luci-newapi luci-lib-fs?g' "${HOME_PATH}/include/target.mk"
   fi
@@ -643,21 +645,8 @@ XWRT|OFFICIAL)
   fi
 ;;
 esac
-
+  echo "33"
 source ${HOME_PATH}/build/common/Share/19.07/netsupport.sh
-
-[[ -d "${HOME_PATH}/build/common/Share/luci-app-samba4" ]] && rm -rf ${HOME_PATH}/build/common/Share/luci-app-samba4
-amba4="$(find . -type d -name 'luci-app-samba4')"
-autosam="$(find . -type d -name 'autosamba')"
-if [[ -z "${amba4}" ]] && [[ -n "${autosam}" ]]; then
-  for X in "$(find . -type d -name 'autosamba')/Makefile"; do sed -i "s?+luci-app-samba4?+luci-app-samba?g" "$X"; done
-else
-  for X in "$(find . -type d -name 'autosamba')/Makefile"; do
-    if [[ `grep -c "+luci-app-samba4" $X` -eq '0' ]]; then
-      sed -i "s?+luci-app-samba?+luci-app-samba4?g" "$X"
-    fi
-  done
-fi
 
 # files大法，设置固件无烦恼
 if [ -n "$(ls -A "${BUILD_PATH}/patches" 2>/dev/null)" ]; then
@@ -722,6 +711,7 @@ fi
 
 function Diy_XWRT() {
 cd ${HOME_PATH}
+  echo "44"
 }
 
 
