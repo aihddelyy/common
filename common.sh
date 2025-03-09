@@ -322,6 +322,7 @@ cat >>"feeds.conf.default" <<-EOF
 src-git danshui1 https://github.com/281677160/openwrt-package.git;${SOURCE}
 src-git helloworld https://github.com/fw876/helloworld.git
 src-git passwall3 https://github.com/xiaorouji/openwrt-passwall-packages;main
+src-git nikki https://github.com/nikkinikki-org/OpenWrt-nikki.git;main
 EOF
 ./scripts/feeds update -a
 
@@ -352,6 +353,14 @@ else
   echo "rust"
 fi
 
+if [[ -d "${HOME_PATH}/feeds/passwall3/shadowsocks-rust" ]]; then
+   curl -o ${HOME_PATH}/feeds/passwall3/shadowsocks-rust/Makefile https://raw.githubusercontent.com/281677160/common/main/Share/shadowsocks-rust/Makefile
+ fi
+ 
+ if [[ -d "${HOME_PATH}/feeds/helloworld/shadowsocks-rust" ]]; then
+   curl -o ${HOME_PATH}/feeds/helloworld/shadowsocks-rust/Makefile https://raw.githubusercontent.com/281677160/common/main/Share/shadowsocks-rust/Makefile
+ fi
+ 
 if [[ -d "${HOME_PATH}/feeds/packages/net/shadowsocks-rust" ]]; then
   rm -rf ${HOME_PATH}/feeds/packages/net/shadowsocks-rust
     echo "shadowsocks-rust"
@@ -1055,11 +1064,13 @@ cd ${HOME_PATH}
 ./scripts/feeds install -a
 
 # 修改nikki升级保留文件列表
-#echo "正在执行：修改nikki升级保留文件列表"
-#echo "/etc/nikki/run/cache.db" >> "feeds/nikki/nikki/files/nikki.upgrade"
-#echo "/etc/nikki/run/ui/" >> "feeds/nikki/nikki/files/nikki.upgrade"
-#echo "/etc/nikki/run/proxies/" >> "feeds/nikki/nikki/files/nikki.upgrade"
-#echo "/etc/nikki/run/rules/" >> "feeds/nikki/nikki/files/nikki.upgrade"
+if [[ -f "${HOME_PATH}/feeds/nikki/nikki/files/nikki.upgrade" ]]; then
+  echo "正在执行：修改nikki升级保留文件列表"
+  echo "/etc/nikki/run/cache.db" >> "feeds/nikki/nikki/files/nikki.upgrade"
+  echo "/etc/nikki/run/ui/" >> "feeds/nikki/nikki/files/nikki.upgrade"
+  echo "/etc/nikki/run/proxies/" >> "feeds/nikki/nikki/files/nikki.upgrade"
+  echo "/etc/nikki/run/rules/" >> "feeds/nikki/nikki/files/nikki.upgrade"
+fi
 
 
 if [[ ! -f "${HOME_PATH}/staging_dir/host/bin/upx" ]]; then
