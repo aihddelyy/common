@@ -1759,7 +1759,7 @@ if [[ ${UPLOAD_FIRMWARE} == "true" ]]; then
 else
   TIME r "上传固件在github actions: 关闭"
 fi
-if [[ ${UPLOAD_RELEAS} == "true" ]]; then
+if [[ ${UPLOAD_RELEASE} == "true" ]]; then
   TIME y "发布固件(Releases): 开启"
 else
   TIME r "发布固件(Releases): 关闭"
