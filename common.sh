@@ -543,11 +543,11 @@ cd ${HOME_PATH}
 
 ./scripts/feeds update -a
 
-if [[ "${OpenClash_branch}" == "1" ]]; then
-  rm -rf ${HOME_PATH}/feeds/danshui/relevance/OpenClashmaster
-else
-  rm -rf ${HOME_PATH}/feeds/danshui/relevance/OpenClashdev
-fi
+#if [[ "${OpenClash_branch}" == "1" ]]; then
+rm -rf ${HOME_PATH}/feeds/danshui/relevance/OpenClashmaster
+#else
+rm -rf ${HOME_PATH}/feeds/danshui/relevance/OpenClashdev
+#fi
 
 # 正在执行插件语言修改
 if [[ "${LUCI_BANBEN}" == "2" ]]; then
@@ -854,6 +854,7 @@ fi
 function Diy_feeds() {
 echo "正在执行：安装feeds,请耐心等待..."
 cd ${HOME_PATH}
+./scripts/feeds update -a
 ./scripts/feeds install -a
 
 # 修改nikki升级保留文件列表
