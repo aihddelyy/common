@@ -260,9 +260,19 @@ fi
 function Diy_checkout() {
 # 下载源码后，进行源码微调和增加插件源
 cd ${HOME_PATH}
+[[ -d "${HOME_PATH}/doc" ]] && rm -rf ${HOME_PATH}/doc
+[[ ! -d "${HOME_PATH}/LICENSES/doc" ]] && mkdir -p "${HOME_PATH}/LICENSES/doc"
+[[ ! -d "${HOME_PATH}/build_logo" ]] && mkdir -p "${HOME_PATH}/build_logo"
 
-#git pull
+LUCI_CHECKUT="$(git tag -l |grep '^V\|^v' |awk 'END {print}')"
+if [[ -n "${LUCI_CHECKUT}" ]]; then
+  git checkout ${LUCI_CHECKUT}
+  git switch -c ${LUCI_CHECKUT}
+fi
 
+git pull
+
+sed -i '/danshui/d' "feeds.conf.default"
 sed -i "2isrc-git danshui https://github.com/281677160/openwrt-package.git;$SOURCE" feeds.conf.default
 
 # 这里增加了源,要对应的删除/etc/opkg/distfeeds.conf插件源
@@ -271,7 +281,7 @@ src-git nikki https://github.com/nikkinikki-org/OpenWrt-nikki.git;main
 EOF
 ./scripts/feeds update -a
 
-z="v2ray-core,v2ray-plugin,v2raya,xray-core,xray-plugin,v2ray-geodata"
+z="v2ray-core,v2ray-plugin,v2raya,xray-core,xray-plugin,v2ray-geodata,luci-theme-argon,luci-theme-design,luci-theme-kucat"
 t=(${z//,/ })
 for x in ${t[@]}; do \
   find . -type d -name "${x}" |grep -v 'danshui' |xargs -i rm -rf {}; \
@@ -315,10 +325,10 @@ fi
 
 Settings_path="$(find "${HOME_PATH}/package" -type d -name "default-settings")"
 if [[ -z "${Settings_path}" ]] && [[ "${LUCI_BANBEN}" == "2" ]]; then
-  cp -Rf ${HOME_PATH}/build/common/Share/default-settings2 ${HOME_PATH}/package/default-settings
+  gitsvn https://github.com/281677160/common/tree/main/Share/default-settings2 ${HOME_PATH}/package/default-settings
   [[ ! -d "${HOME_PATH}/feeds/luci/libs/luci-lib-base" ]] && sed -i "s/+luci-lib-base //g" ${HOME_PATH}/package/default-settings/Makefile
 elif [[ -z "${Settings_path}" ]] && [[ "${LUCI_BANBEN}" == "1" ]]; then
-  cp -Rf ${HOME_PATH}/build/common/Share/default-settings1 ${HOME_PATH}/package/default-settings
+  gitsvn https://github.com/281677160/common/tree/main/Share/default-settings2 ${HOME_PATH}/package/default-settings
 fi
 
 ZZZ_PATH="$(find "${HOME_PATH}/package" -type f -name "*-default-settings" |grep files)"
@@ -326,9 +336,39 @@ if [[ -n "${ZZZ_PATH}" ]]; then
   echo "ZZZ_PATH=${ZZZ_PATH}" >> ${GITHUB_ENV}
   sed -i '/exit 0$/d' "${ZZZ_PATH}"
 
+  if [[ -f "${HOME_PATH}/LICENSES/doc/default-settings" ]]; then
+    cp -Rf ${HOME_PATH}/LICENSES/doc/default-settings "${ZZZ_PATH}"
+  else
+    cp -Rf "${ZZZ_PATH}" ${HOME_PATH}/LICENSES/doc/default-settings
+  fi
+
+  if [[ -f "${HOME_PATH}/LICENSES/doc/config_generates" ]]; then
+    cp -Rf ${HOME_PATH}/LICENSES/doc/config_generates "${GENE_PATH}"
+  else
+    cp -Rf "${GENE_PATH}" ${HOME_PATH}/LICENSES/doc/config_generates
+  fi
   sed -i "s?main.lang=.*?main.lang='zh_cn'?g" "${ZZZ_PATH}"
+  [[ -n "$(grep "openwrt_banner" "${ZZZ_PATH}")" ]] && sed -i '/openwrt_banner/d' "${ZZZ_PATH}"
+
+cat >> "${ZZZ_PATH}" <<-EOF
+sed -i '/DISTRIB_DESCRIPTION/d' /etc/openwrt_release
+echo "DISTRIB_DESCRIPTION='OpenWrt '" >> /etc/openwrt_release
+sed -i '/luciversion/d' /usr/lib/lua/luci/version.lua
+echo "luciversion    = \"${LUCI_EDITION}\"" >> /usr/lib/lua/luci/version.lua
+sed -i '/luciname/d' /usr/lib/lua/luci/version.lua
+echo "luciname    = \"${SOURCE}\"" >> /usr/lib/lua/luci/version.lua
+EOF
 fi
-echo "3"
+
+if [[ -d "${HOME_PATH}/target/linux/armsr" ]]; then
+  features_file="${HOME_PATH}/target/linux/armsr/Makefile"
+elif [[ -d "${HOME_PATH}/target/linux/armvirt" ]]; then
+  features_file="${HOME_PATH}/target/linux/armvirt/Makefile"
+fi
+[[ -n "${features_file}" ]] && sed -i "s?FEATURES+=.*?FEATURES+=targz?g" "${features_file}"
+sed -i '/DISTRIB_SOURCECODE/d' "${REPAIR_PATH}"
+echo -e "\nDISTRIB_SOURCECODE='${SOURCE}_${LUCI_EDITION}'" >> "${REPAIR_PATH}" && sed -i '/^\s*$/d' "${REPAIR_PATH}"
+
 # 增加一些应用
 cp -Rf ${HOME_PATH}/build/common/custom/default-setting "${DEFAULT_PATH}"
 sudo chmod +x "${DEFAULT_PATH}"
@@ -343,6 +383,17 @@ giturl https://github.com/281677160/common/blob/main/custom/Postapplication ${FI
 giturl https://github.com/281677160/common/blob/main/custom/networkdetection ${FILES_PATH}/etc/init.d/networkdetection
 giturl https://github.com/281677160/common/blob/main/custom/openwrt.sh ${FILES_PATH}/usr/bin/openwrt
 
+amba4="$(find . -type d -name 'luci-app-samba4')"
+autosam="$(find . -type d -name 'autosamba')"
+if [[ -z "${amba4}" ]] && [[ -n "${autosam}" ]]; then
+  for X in "$(find . -type d -name 'autosamba')/Makefile"; do sed -i "s?+luci-app-samba4?+luci-app-samba?g" "$X"; done
+else
+  for X in "$(find . -type d -name 'autosamba')/Makefile"; do
+    if [[ `grep -c "+luci-app-samba4" $X` -eq '0' ]]; then
+      sed -i "s?+luci-app-samba?+luci-app-samba4?g" "$X"
+    fi
+  done
+fi
 
 # 给固件保留配置更新固件的保留项目
 if [[ -z "$(grep "background" ${KEEPD_PATH})" ]]; then
@@ -436,17 +487,23 @@ cd ${HOME_PATH}
 if [[ "${REPO_BRANCH}" == *"19.07"* ]]; then
   gitsvn https://github.com/281677160/common/tree/main/Share/libcap ${HOME_PATH}/feeds/packages/libs/libcap
 fi
+gitsvn https://github.com/openwrt/packages/tree/master/net/tailscale ${HOME_PATH}/feeds/packages/net/tailscale
+if [[ "${REPO_BRANCH}" == *"22.03"* ]]; then
+  gitsvn https://github.com/coolsnowwolf/packages/tree/master/libs/pcre2 ${HOME_PATH}/feeds/packages/libs/pcre2
+  gitsvn https://github.com/coolsnowwolf/packages/tree/master/libs/glib2 ${HOME_PATH}/feeds/packages/libs/glib2
+  rm -rf ${HOME_PATH}/feeds/luci/luci-app-ntpc
+fi
+if [[ "${REPO_BRANCH}" =~ (19.07|21.02) ]]; then
+  rm -rf ${HOME_PATH}/feeds/danshui/luci-app-nikki
+  rm -rf ${HOME_PATH}/feeds/danshui/relevance/nikki
+fi
 }
 
 
 function Diy_IMMORTALWRT() {
 cd ${HOME_PATH}
 if [[ "${REPO_BRANCH}" =~ (openwrt-18.06|openwrt-18.06-k5.4) ]]; then
-  # 增加缺少的bmx6
-  if [[ -d "${HOME_PATH}/build/common/Share/bmx6" ]]; then
-    rm -rf ${HOME_PATH}/feeds/routing/bmx6
-    cp -Rf ${HOME_PATH}/build/common/Share/bmx6 ${HOME_PATH}/feeds/routing/bmx6
-  fi
+  gitsvn https://github.com/openwrt/routing/tree/openwrt-21.02/bmx6 ${HOME_PATH}/feeds/routing/bmx6
 fi
 }
 
@@ -458,6 +515,7 @@ cd ${HOME_PATH}
 
 function Diy_OFFICIAL() {
 cd ${HOME_PATH}
+gitsvn https://github.com/openwrt/packages/tree/master/net/tailscale ${HOME_PATH}/feeds/packages/net/tailscale
 if [[ "${REPO_BRANCH}" == *"22.03"* ]]; then
   gitsvn https://github.com/coolsnowwolf/packages/tree/master/libs/pcre2 ${HOME_PATH}/feeds/packages/libs/pcre2
   gitsvn https://github.com/coolsnowwolf/packages/tree/master/libs/glib2 ${HOME_PATH}/feeds/packages/libs/glib2
@@ -472,7 +530,6 @@ if [[ "${REPO_BRANCH}" =~ (openwrt-19.07|openwrt-21.02) ]]; then
   rm -rf ${HOME_PATH}/feeds/danshui/luci-app-nikki
   rm -rf ${HOME_PATH}/feeds/danshui/relevance/nikki
 fi
-gitsvn https://github.com/openwrt/packages/tree/master/net/tailscale ${HOME_PATH}/feeds/packages/net/tailscale
 }
 
 
@@ -804,7 +861,6 @@ if [[ -f "${HOME_PATH}/feeds/nikki/nikki/files/nikki.upgrade" ]]; then
   echo "/etc/nikki/run/proxies/" >> "feeds/nikki/nikki/files/nikki.upgrade"
   echo "/etc/nikki/run/rules/" >> "feeds/nikki/nikki/files/nikki.upgrade"
 fi
-
 
 if [[ ! -f "${HOME_PATH}/staging_dir/host/bin/upx" ]]; then
   cp -Rf /usr/bin/upx ${HOME_PATH}/staging_dir/host/bin/upx
