@@ -548,7 +548,7 @@ rm -rf ${HOME_PATH}/feeds/danshui/relevance/OpenClashmaster
 #else
 rm -rf ${HOME_PATH}/feeds/danshui/relevance/OpenClashdev
 #fi
-
+./scripts/feeds update -a
 # 正在执行插件语言修改
 if [[ "${LUCI_BANBEN}" == "2" ]]; then
   cp -Rf ${HOME_PATH}/build/common/language/zh_Hans.sh ${HOME_PATH}/zh_Hans.sh
