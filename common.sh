@@ -261,7 +261,7 @@ function Diy_checkout() {
 # 下载源码后，进行源码微调和增加插件源
 cd ${HOME_PATH}
 
-git pull
+#git pull
 
 sed -i "2isrc-git danshui https://github.com/281677160/openwrt-package.git;$SOURCE" feeds.conf.default
 
@@ -270,6 +270,17 @@ cat >>"feeds.conf.default" <<-EOF
 src-git nikki https://github.com/nikkinikki-org/OpenWrt-nikki.git;main
 EOF
 ./scripts/feeds update -a
+
+z="v2ray-core,v2ray-plugin,v2raya,xray-core,xray-plugin,v2ray-geodata"
+t=(${z//,/ })
+for x in ${t[@]}; do \
+  find . -type d -name "${x}" |grep -v 'danshui' |xargs -i rm -rf {}; \
+done
+
+if [[ "${REPO_BRANCH}" == *"18.06"* ]] || [[ "${REPO_BRANCH}" == *"19.07"* ]] || [[ "${REPO_BRANCH}" == *"21.02"* ]]; then
+  source ${HOME_PATH}/build/common/Share/19.07/netsupport.sh
+  gitsvn https://github.com/281677160/common/tree/main/Share/v2raya ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/v2raya
+fi
 
 # 更换golang版本
 gitcon https://github.com/sbwml/packages_lang_golang ${HOME_PATH}/feeds/packages/lang/golang
@@ -280,17 +291,14 @@ gitcon https://github.com/sbwml/feeds_packages_lang_node-prebuilt ${HOME_PATH}/f
 # 增加rust文件
 gitsvn https://github.com/immortalwrt/packages/tree/master/lang/rust ${HOME_PATH}/feeds/packages/lang/rust
 
-source ${HOME_PATH}/build/common/Share/19.07/netsupport.sh
-
 echo '#!/bin/bash' > "${DELETE}" && sudo chmod +x "${DELETE}"
-
 
 if [[ "${REPO_BRANCH}" == *"18.06"* ]] || [[ "${REPO_BRANCH}" == *"19.07"* ]] || [[ "${REPO_BRANCH}" == *"21.02"* ]] || [[ "${REPO_BRANCH}" == *"22.03"* ]] || [[ "${REPO_BRANCH}" == *"23.05"* ]]; then
   gitsvn https://github.com/281677160/common/tree/main/Share/shadowsocks-rust ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/shadowsocks-rust
-  gitsvn https://github.com/281677160/common/tree/main/Share/shadowsocks-rust ${HOME_PATH}/feeds/danshui/relevance/passwall-packages/shadowsocks-rust
 fi
-
-gitsvn https://github.com/281677160/common/tree/main/Share/packr ${HOME_PATH}/feeds/packages/devel/packr
+if [[ ! -d "${HOME_PATH}/feeds/packages/devel/packr" ]]; then
+  gitsvn https://github.com/281677160/common/tree/main/Share/packr ${HOME_PATH}/feeds/packages/devel/packr
+fi
 }
 
 
@@ -331,9 +339,9 @@ if [[ `grep -Eoc "admin:.*" ${FILES_PATH}/etc/shadow` -eq '1' ]]; then
   sed -i 's/admin:.*/admin::0:0:99999:7:::/g' ${FILES_PATH}/etc/shadow
 fi
 
-giturl https://github.com/281677160/common/blob/main/custom/Postapplication "${FILES_PATH}/etc/init.d/Postapplication"
-giturl https://github.com/281677160/common/blob/main/custom/networkdetection "${FILES_PATH}/etc/init.d/networkdetection"
-giturl https://github.com/281677160/common/blob/main/custom/openwrt.sh "${FILES_PATH}/usr/bin/openwrt"
+giturl https://github.com/281677160/common/blob/main/custom/Postapplication ${FILES_PATH}/etc/init.d/Postapplication
+giturl https://github.com/281677160/common/blob/main/custom/networkdetection ${FILES_PATH}/etc/init.d/networkdetection
+giturl https://github.com/281677160/common/blob/main/custom/openwrt.sh ${FILES_PATH}/usr/bin/openwrt
 
 
 # 给固件保留配置更新固件的保留项目
@@ -456,7 +464,15 @@ if [[ "${REPO_BRANCH}" == *"22.03"* ]]; then
 fi
 if [[ "${REPO_BRANCH}" == *"19.07"* ]]; then
   gitsvn https://github.com/281677160/common/tree/main/Share/libcap ${HOME_PATH}/feeds/packages/libs/libcap
+  gitsvn https://github.com/coolsnowwolf/packages/tree/master/net/kcptun ${HOME_PATH}/feeds/packages/net/kcptun
+  gitsvn https://github.com/openwrt/openwrt/tree/openwrt-22.03/package/utils/bcm27xx-userland ${HOME_PATH}/package/utils/bcm27xx-userland
+  rm -rf ${HOME_PATH}/feeds/danshui/luci-app-diskman
 fi
+if [[ "${REPO_BRANCH}" =~ (openwrt-19.07|openwrt-21.02) ]]; then
+  rm -rf ${HOME_PATH}/feeds/danshui/luci-app-nikki
+  rm -rf ${HOME_PATH}/feeds/danshui/relevance/nikki
+fi
+gitsvn https://github.com/openwrt/packages/tree/master/net/tailscale ${HOME_PATH}/feeds/packages/net/tailscale
 }
 
 
@@ -1109,7 +1125,7 @@ if [[ `grep -c "CONFIG_TARGET_ROOTFS_EXT4FS=y" ${HOME_PATH}/.config` -eq '1' ]];
     echo "" >> ${HOME_PATH}/CHONGTU
   fi
 fi
-
+echo "999"
 cd ${HOME_PATH}
 make defconfig > /dev/null 2>&1
 [[ ! -d "${HOME_PATH}/build_logo" ]] && mkdir -p ${HOME_PATH}/build_logo

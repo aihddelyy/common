@@ -19,10 +19,10 @@ libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev 
 libreadline-dev libssl-dev libtool llvm lrzsz msmtp ninja-build p7zip p7zip-full patch pkgconf \
 python3 python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion \
 swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
+
 sudo apt-get install -y rename pigz libfuse-dev upx subversion clang
 sudo apt-get install -y $(curl -fsSL https://is.gd/depend_ubuntu2204_openwrt)
 
-go version
 sudo rm -rf /usr/local/go
 sudo apt-get -y remove golang
 sudo apt-get -y remove golang-go
@@ -30,7 +30,11 @@ sudo wget https://golang.google.cn/dl/go1.24.1.linux-amd64.tar.gz
 sudo tar -C /usr/local -xzf go1.24.1.linux-amd64.tar.gz
 export PATH=$PATH:/usr/local/go/bin
 go version
-
+sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa
+sudo apt-get install -y gcc-13
+sudo apt-get install -y g++-13
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 60 --slave /usr/bin/g++ g++ /usr/bin/g++-13
 }
 
 function update_apt_source(){
