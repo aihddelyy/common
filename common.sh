@@ -496,6 +496,16 @@ if [[ "${REPO_BRANCH}" == *"22.03"* ]]; then
   gitsvn https://github.com/coolsnowwolf/packages/tree/master/libs/glib2 ${HOME_PATH}/feeds/packages/libs/glib2
   rm -rf ${HOME_PATH}/feeds/luci/luci-app-ntpc
 fi
+if [[ "${REPO_BRANCH}" == *"24.10"* ]]; then
+   gitsvn https://github.com/coolsnowwolf/lede/tree/master/package/libs/mbedtls ${HOME_PATH}/package/libs/mbedtls
+   gitsvn https://github.com/coolsnowwolf/lede/tree/master/package/libs/ustream-ssl ${HOME_PATH}/package/libs/ustream-ssl
+fi
+if [[ "${REPO_BRANCH}" == *"main"* ]]; then
+  gitsvn https://github.com/openwrt/packages/tree/master/utils/fatresize ${HOME_PATH}/feeds/packages/utils/fatresize
+  gitsvn https://github.com/bcl/parted/tree/master/libparted ${HOME_PATH}/feeds/packages/utils/libparted
+  rm -fr ${HOME_PATH}/feeds/other/vlmcsd
+  rm -fr ${HOME_PATH}/feeds/other/luci-app-vlmcsd
+fi
 if [[ "${REPO_BRANCH}" =~ (19.07|21.02) ]]; then
   rm -rf ${HOME_PATH}/feeds/danshui/luci-app-nikki
   rm -rf ${HOME_PATH}/feeds/danshui/relevance/nikki
@@ -541,14 +551,13 @@ cd ${HOME_PATH}
 source $BUILD_PATH/$DIY_PART_SH
 cd ${HOME_PATH}
 
-./scripts/feeds update -a
-
 #if [[ "${OpenClash_branch}" == "1" ]]; then
 rm -rf ${HOME_PATH}/feeds/danshui/relevance/OpenClashmaster
 #else
 rm -rf ${HOME_PATH}/feeds/danshui/relevance/OpenClashdev
 #fi
 ./scripts/feeds update -a
+
 # 正在执行插件语言修改
 if [[ "${LUCI_BANBEN}" == "2" ]]; then
   cp -Rf ${HOME_PATH}/build/common/language/zh_Hans.sh ${HOME_PATH}/zh_Hans.sh
