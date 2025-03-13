@@ -283,7 +283,7 @@ EOF
 z="*luci-theme-argon*,*luci-app-argon-config*,*luci-theme-Butterfly*,*luci-theme-netgear*,*luci-theme-atmaterial*, \
 luci-theme-rosy,luci-theme-darkmatter,luci-theme-infinityfreedom,luci-theme-design,luci-app-design-config, \
 luci-theme-bootstrap-mod,luci-theme-freifunk-generic,luci-theme-opentomato,luci-theme-kucat, \
-luci-app-eqos,adguardhome,luci-app-adguardhome,mosdns,luci-app-mosdns,luci-app-openclash, \
+luci-app-eqos,adguardhome,luci-app-adguardhome,mosdns,luci-app-mosdns, \
 luci-app-gost,gost,luci-app-smartdns,smartdns,luci-app-wizard,luci-app-msd_lite,msd_lite, \
 luci-app-ssr-plus,*luci-app-passwall*,lua-maxminddb,v2dat,v2ray-geodata, \
 v2ray-core,v2ray-plugin,v2raya,xray-core,xray-plugin"
@@ -360,6 +360,10 @@ if [[ -n "${ZZZ_PATH}" ]]; then
   [[ -n "$(grep "openwrt_banner" "${ZZZ_PATH}")" ]] && sed -i '/openwrt_banner/d' "${ZZZ_PATH}"
 
 cat >> "${ZZZ_PATH}" <<-EOF
+sed -i '/DISTRIB_RELEASE/d' /etc/openwrt_release
+echo "DISTRIB_RELEASE='OpenWrt '" >> /etc/openwrt_release
+sed -i '/DISTRIB_REVISION/d' /etc/openwrt_release
+echo "DISTRIB_REVISION=''" >> /etc/openwrt_release
 sed -i '/DISTRIB_DESCRIPTION/d' /etc/openwrt_release
 echo "DISTRIB_DESCRIPTION='OpenWrt '" >> /etc/openwrt_release
 sed -i '/luciversion/d' /usr/lib/lua/luci/version.lua
@@ -564,13 +568,12 @@ cd ${HOME_PATH}
 source $BUILD_PATH/$DIY_PART_SH
 cd ${HOME_PATH}
 
+#if [[ "${OpenClash_branch}" == "1" ]]; then
+rm -rf ${HOME_PATH}/feeds/danshui/relevance/OpenClashmaster
+#else
+rm -rf ${HOME_PATH}/feeds/danshui/relevance/OpenClashdev
+#fi
 ./scripts/feeds update -a
-
-if [[ "${OpenClash_branch}" == "1" ]]; then
-  rm -rf ${HOME_PATH}/feeds/danshui/relevance/OpenClashmaster
-else
-  rm -rf ${HOME_PATH}/feeds/danshui/relevance/OpenClashdev
-fi
 
 # 正在执行插件语言修改
 if [[ "${LUCI_BANBEN}" == "2" ]]; then
@@ -696,8 +699,8 @@ if [[ "${Customized_Information}" == "0" ]] || [[ -z "${Customized_Information}"
   echo "不进行,个性签名设置"
 elif [[ -n "${Customized_Information}" ]]; then
   sed -i "s?DESCRIPTION=.*?DESCRIPTION='OpenWrt '\" >> /etc/openwrt_release?g" "${ZZZ_PATH}"
+  sed -i "s?RELEASE=.*?RELEASE='OpenWrt '\" >> /etc/openwrt_release?g" "${ZZZ_PATH}"
   sed -i "s?OpenWrt ?${Customized_Information} @ OpenWrt ?g" "${ZZZ_PATH}"
-  sed -i "s?OpenWrt2410?${Customized_Information} @ OpenWrt?g" "${DEFAULT_PATH}"
   echo "个性签名[${Customized_Information}]增加完成"
 fi
 
