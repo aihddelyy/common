@@ -273,12 +273,9 @@ fi
 git pull
 
 sed -i '/danshui/d' "feeds.conf.default"
-sed -i "2isrc-git danshui https://github.com/281677160/openwrt-package.git;$SOURCE" feeds.conf.default
-
 # 这里增加了源,要对应的删除/etc/opkg/distfeeds.conf插件源
-cat >>"feeds.conf.default" <<-EOF
-src-git nikki https://github.com/nikkinikki-org/OpenWrt-nikki.git;main
-EOF
+echo "src-git danshui https://github.com/281677160/openwrt-package.git;$SOURCE" >> feeds.conf.default
+echo "src-git nikki https://github.com/nikkinikki-org/OpenWrt-nikki.git;main" >> feeds.conf.default
 ./scripts/feeds update -a
 
 z="v2ray-core,v2ray-plugin,v2raya,xray-core,xray-plugin,v2ray-geodata, \
