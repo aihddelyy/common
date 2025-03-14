@@ -130,12 +130,12 @@ LIENOL)
 ;;
 IMMORTALWRT)
   if [[ "${REPO_BRANCH}" == "mt798x" ]]; then
-    export REPO_URL="https://github.com/hanwckf/immortalwrt-mt798x"
+    export REPO_URL="https://github.com/padavanonly/immortalwrt-mt798x-23.05"
     export SOURCE="Immortalwrt"
-    export SOURCE_OWNER="hanwckf's"
+    export SOURCE_OWNER="padavanonly's"
     export LUCI_EDITION="mt798x"
-    export DIY_WORK="hanwckf2102"
-    export REPO_BRANCH="openwrt-21.02"
+    export DIY_WORK="padavanonly23.05"
+    export REPO_BRANCH="openwrt-23.05"
   else
     export REPO_URL="https://github.com/immortalwrt/immortalwrt"
     export SOURCE="Immortalwrt"
@@ -253,7 +253,6 @@ else
   sudo sh -c 'echo openwrt > /etc/oprelyon'
   TIME b "全部依赖安装完毕"
 fi
-  gcc --version
 }
 
 
@@ -269,21 +268,14 @@ if [[ -n "${LUCI_CHECKUT}" ]]; then
   git checkout ${LUCI_CHECKUT}
   git switch -c ${LUCI_CHECKUT}
 fi
-
 git pull
+
 
 sed -i '/danshui/d' "feeds.conf.default"
 # 这里增加了源,要对应的删除/etc/opkg/distfeeds.conf插件源
 echo "src-git danshui https://github.com/281677160/openwrt-package.git;$SOURCE" >> feeds.conf.default
 echo "src-git nikki https://github.com/nikkinikki-org/OpenWrt-nikki.git;main" >> feeds.conf.default
 ./scripts/feeds update -a
-
-z="v2ray-core,v2ray-plugin,v2raya,xray-core,xray-plugin,v2ray-geodata, \
-luci-theme-argon,luci-theme-design,luci-theme-kucat,luci-app-smartdns,smartdns"
-t=(${z//,/ })
-for x in ${t[@]}; do \
-  find . -type d -name "${x}" |grep -v 'danshui' |xargs -i rm -rf {}; \
-done
 
 if [[ "${REPO_BRANCH}" == *"18.06"* ]] || [[ "${REPO_BRANCH}" == *"19.07"* ]] || [[ "${REPO_BRANCH}" == *"21.02"* ]]; then
   gitsvn https://github.com/281677160/common/tree/main/Share/v2raya ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/v2raya
@@ -295,13 +287,13 @@ gitcon https://github.com/sbwml/packages_lang_golang ${HOME_PATH}/feeds/packages
 # 更换node版本
 gitcon https://github.com/sbwml/feeds_packages_lang_node-prebuilt ${HOME_PATH}/feeds/packages/lang/node
 
-# 增加rust文件
-gitsvn https://github.com/immortalwrt/packages/tree/master/lang/rust ${HOME_PATH}/feeds/packages/lang/rust
-
 echo '#!/bin/bash' > "${DELETE}" && sudo chmod +x "${DELETE}"
 
 if [[ "${REPO_BRANCH}" == *"18.06"* ]] || [[ "${REPO_BRANCH}" == *"19.07"* ]] || [[ "${REPO_BRANCH}" == *"21.02"* ]] || [[ "${REPO_BRANCH}" == *"22.03"* ]] || [[ "${REPO_BRANCH}" == *"23.05"* ]]; then
-  gitsvn https://github.com/281677160/common/tree/main/Share/shadowsocks-rust ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/shadowsocks-rust
+  giturl https://github.com/281677160/common/blob/9e73637953026dcb94fea245321e63a15e66320c/Share/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/shadowsocks-rust/Makefile
+  giturl https://github.com/281677160/common/blob/9e73637953026dcb94fea245321e63a15e66320c/Share/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/relevance/passwall-packages/shadowsocks-rust/Makefile
+  gitsvn https://github.com/immortalwrt/packages/tree/master/lang/rust ${HOME_PATH}/feeds/packages/lang/rust
+  source ${HOME_PATH}/build/common/Share/19.07/netsupport.sh
 fi
 if [[ ! -d "${HOME_PATH}/feeds/packages/devel/packr" ]]; then
   gitsvn https://github.com/281677160/common/tree/main/Share/packr ${HOME_PATH}/feeds/packages/devel/packr
@@ -350,10 +342,6 @@ if [[ -n "${ZZZ_PATH}" ]]; then
   [[ -n "$(grep "openwrt_banner" "${ZZZ_PATH}")" ]] && sed -i '/openwrt_banner/d' "${ZZZ_PATH}"
 
 cat >> "${ZZZ_PATH}" <<-EOF
-sed -i '/DISTRIB_RELEASE/d' /etc/openwrt_release
-echo "DISTRIB_RELEASE='OpenWrt '" >> /etc/openwrt_release
-sed -i '/DISTRIB_REVISION/d' /etc/openwrt_release
-echo "DISTRIB_REVISION=''" >> /etc/openwrt_release
 sed -i '/DISTRIB_DESCRIPTION/d' /etc/openwrt_release
 echo "DISTRIB_DESCRIPTION='OpenWrt '" >> /etc/openwrt_release
 sed -i '/luciversion/d' /usr/lib/lua/luci/version.lua
@@ -484,19 +472,12 @@ if [[ "${REPO_BRANCH}" == *"22.03"* ]]; then
   gitsvn https://github.com/coolsnowwolf/packages/tree/master/libs/glib2 ${HOME_PATH}/feeds/packages/libs/glib2
   rm -rf ${HOME_PATH}/feeds/luci/luci-app-ntpc
 fi
-if [[ "${REPO_BRANCH}" == *"24.10"* ]]; then
-   gitsvn https://github.com/coolsnowwolf/lede/tree/master/package/libs/mbedtls ${HOME_PATH}/package/libs/mbedtls
-   gitsvn https://github.com/coolsnowwolf/lede/tree/master/package/libs/ustream-ssl ${HOME_PATH}/package/libs/ustream-ssl
-fi
-if [[ "${REPO_BRANCH}" == *"main"* ]]; then
-  gitsvn https://github.com/openwrt/packages/tree/master/utils/fatresize ${HOME_PATH}/feeds/packages/utils/fatresize
-  gitsvn https://github.com/bcl/parted/tree/master/libparted ${HOME_PATH}/feeds/packages/utils/libparted
-  rm -fr ${HOME_PATH}/feeds/other/vlmcsd
-  rm -fr ${HOME_PATH}/feeds/other/luci-app-vlmcsd
-fi
 if [[ "${REPO_BRANCH}" =~ (19.07|21.02) ]]; then
   rm -rf ${HOME_PATH}/feeds/danshui/luci-app-nikki
   rm -rf ${HOME_PATH}/feeds/danshui/relevance/nikki
+  gitsvn https://github.com/openwrt/openwrt/tree/openwrt-23.05/tools/cmake ${HOME_PATH}/tools/cmake
+  gitsvn https://github.com/openwrt/packages/tree/openwrt-24.10/lang/ruby ${HOME_PATH}/feeds/packages/lang/ruby
+  gitsvn https://github.com/openwrt/packages/tree/openwrt-24.10/libs/yaml ${HOME_PATH}/feeds/packages/libs/yaml
 fi
 [[ -d "${HOME_PATH}/build/common/Share/luci-app-samba4" ]] && rm -rf ${HOME_PATH}/build/common/Share/luci-app-samba4
 amba4="$(find . -type d -name 'luci-app-samba4')"
@@ -528,20 +509,19 @@ cd ${HOME_PATH}
 
 function Diy_OFFICIAL() {
 cd ${HOME_PATH}
-gitsvn https://github.com/openwrt/packages/tree/master/net/tailscale ${HOME_PATH}/feeds/packages/net/tailscale
 if [[ "${REPO_BRANCH}" == *"22.03"* ]]; then
   gitsvn https://github.com/coolsnowwolf/packages/tree/master/libs/pcre2 ${HOME_PATH}/feeds/packages/libs/pcre2
   gitsvn https://github.com/coolsnowwolf/packages/tree/master/libs/glib2 ${HOME_PATH}/feeds/packages/libs/glib2
 fi
 if [[ "${REPO_BRANCH}" == *"19.07"* ]]; then
   gitsvn https://github.com/281677160/common/tree/main/Share/libcap ${HOME_PATH}/feeds/packages/libs/libcap
-  gitsvn https://github.com/coolsnowwolf/packages/tree/master/net/kcptun ${HOME_PATH}/feeds/packages/net/kcptun
   gitsvn https://github.com/openwrt/openwrt/tree/openwrt-22.03/package/utils/bcm27xx-userland ${HOME_PATH}/package/utils/bcm27xx-userland
   rm -rf ${HOME_PATH}/feeds/danshui/luci-app-diskman
 fi
 if [[ "${REPO_BRANCH}" =~ (openwrt-19.07|openwrt-21.02) ]]; then
   rm -rf ${HOME_PATH}/feeds/danshui/luci-app-nikki
   rm -rf ${HOME_PATH}/feeds/danshui/relevance/nikki
+  gitsvn https://github.com/openwrt/openwrt/tree/openwrt-23.05/tools/cmake ${HOME_PATH}/tools/cmake
 fi
 }
 
@@ -864,7 +844,6 @@ fi
 function Diy_feeds() {
 echo "正在执行：安装feeds,请耐心等待..."
 cd ${HOME_PATH}
-./scripts/feeds update -a
 ./scripts/feeds install -a
 
 # 修改nikki升级保留文件列表
@@ -1552,11 +1531,11 @@ fi
 
 echo "开始打包"
 cd ${GITHUB_WORKSPACE}/amlogic
-sudo chmod +x make
+sudo chmod +x remake
 if [[ -z "${gh_token}" ]]; then
-  sudo ./make -b ${amlogic_model} -k ${amlogic_kernel} -a ${auto_kernel} -s ${rootfs_size} -r ${kernel_repo} -u ${kernel_usage}
+  sudo ./remake -b ${amlogic_model} -k ${amlogic_kernel} -a ${auto_kernel} -s ${rootfs_size} -r ${kernel_repo} -u ${kernel_usage}
 else
-  sudo ./make -b ${amlogic_model} -k ${amlogic_kernel} -a ${auto_kernel} -s ${rootfs_size} -r ${kernel_repo} -u ${kernel_usage}
+  sudo ./remake -b ${amlogic_model} -k ${amlogic_kernel} -a ${auto_kernel} -s ${rootfs_size} -r ${kernel_repo} -u ${kernel_usage}
 fi
 if [[ 0 -eq $? ]]; then
   sudo mv -f ${GITHUB_WORKSPACE}/amlogic/openwrt/out/* ${FIRMWARE_PATH}/ && sync
@@ -1773,7 +1752,7 @@ esac
 
 function Diy_xinxi() {
 # 信息
-Plug_in1="$(grep -Eo "CONFIG_PACKAGE_luci-app-.*=y|CONFIG_PACKAGE_luci-theme-.*=y" .config |grep -v 'INCLUDE\|_Proxy\|_static\|_dynamic' |sed 's/=y//' |sed 's/CONFIG_PACKAGE_//g')"
+Plug_in1="$(grep -Eo "CONFIG_PACKAGE_luci-app-.*=y|CONFIG_PACKAGE_luci-theme-.*=y" .config |grep -v 'INCLUDE\|_Proxy\|_static\|_dynamic\|_USE' |sed 's/=y//' |sed 's/CONFIG_PACKAGE_//g')"
 Plug_in2="$(echo "${Plug_in1}" |sed 's/^/、/g' |sed 's/$/\"/g' |awk '$0=NR$0' |sed 's/^/TIME g \"       /g')"
 echo "${Plug_in2}" >Plug-in
 
@@ -1963,11 +1942,11 @@ if [[ $A =~ tree/([^/]+)(/(.*))? ]]; then
         content="$HOME_PATH/package/$B"
     fi
     
-    echo "${url}"
-    git clone -b "${branch_name}" --depth 1 --filter=blob:none --sparse  "${url}" "${C}"
+    git clone --no-checkout "${url}" "${C}"
     cd "${C}"
     git sparse-checkout init --cone
     git sparse-checkout set "${path_part}"
+    git checkout "${branch_name}"
     if [[ $? -ne 0 ]]; then
         echo "${A}文件下载失败,请检查网络,或查看链接正确性"
     else
@@ -2024,12 +2003,11 @@ if [[ -n "${url}" ]]; then
         content="$HOME_PATH/package/$B"
     fi
     
-    echo "${url}"
     sudo rm -rf "${C}"
     if [[ -n "${branch_name}" ]]; then
         git clone -b "${branch_name}" --single-branch "${url}" "${C}"
     else
-        git clone "${url}" "${C}"
+        git clone --depth 1 "${url}" "${C}"
     fi
     if [[ $? -ne 0 ]]; then
         echo "${A}文件下载失败,请检查网络,或查看链接正确性"
@@ -2087,11 +2065,9 @@ if [[ -n "${url}" ]]; then
         rm -rf "${content}"
     fi
     
-    echo "${url}"
-    echo "${content}"
-    curl -# -L "${url}" -o "${content}"
+    wget -q --show-progress "${url}" -O "${content}"
     if [[ ! -s "${content}" ]]; then
-        wget -q --show-progress "${url}" -O "${content}"
+        curl -# -L "${url}" -o "${content}"
         if [[ ! -s "${content}" ]]; then
             echo "${A}文件下载失败,请检查网络,或查看链接正确性"
         else
