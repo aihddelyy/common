@@ -277,6 +277,12 @@ echo "src-git danshui https://github.com/281677160/openwrt-package.git;$SOURCE" 
 echo "src-git nikki https://github.com/nikkinikki-org/OpenWrt-nikki.git;main" >> feeds.conf.default
 ./scripts/feeds update -a
 
+# 下载mosdns
+find ./ | grep Makefile | grep v2ray-geodata | xargs rm -f
+find ./ | grep Makefile | grep mosdns | xargs rm -f
+git clone https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
+git clone https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
+
 if [[ "${REPO_BRANCH}" == *"18.06"* ]] || [[ "${REPO_BRANCH}" == *"19.07"* ]] || [[ "${REPO_BRANCH}" == *"21.02"* ]]; then
   gitsvn https://github.com/281677160/common/tree/main/Share/v2raya ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/v2raya
 fi
