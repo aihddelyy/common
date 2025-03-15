@@ -259,6 +259,7 @@ fi
 function Diy_checkout() {
 # 下载源码后，进行源码微调和增加插件源
 cd ${HOME_PATH}
+echo '#!/bin/bash' > "${DELETE}" && sudo chmod +x "${DELETE}"
 [[ -d "${HOME_PATH}/doc" ]] && rm -rf ${HOME_PATH}/doc
 [[ ! -d "${HOME_PATH}/LICENSES/doc" ]] && mkdir -p "${HOME_PATH}/LICENSES/doc"
 [[ ! -d "${HOME_PATH}/build_logo" ]] && mkdir -p "${HOME_PATH}/build_logo"
@@ -277,15 +278,7 @@ echo "src-git danshui https://github.com/281677160/openwrt-package.git;Lede >> f
 echo "src-git nikki https://github.com/nikkinikki-org/OpenWrt-nikki.git;main" >> feeds.conf.default
 ./scripts/feeds update -a
 
-# 下载mosdns
-# find ./ | grep Makefile | grep v2ray-geodata | xargs rm -f
-# find ./ | grep Makefile | grep mosdns | xargs rm -f
-# git clone https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
-# git clone https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
 
-if [[ "${REPO_BRANCH}" == *"18.06"* ]] || [[ "${REPO_BRANCH}" == *"19.07"* ]] || [[ "${REPO_BRANCH}" == *"21.02"* ]]; then
-  gitsvn https://github.com/281677160/common/tree/main/Share/v2raya ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/v2raya
-fi
 
 # 更换golang版本
 gitcon https://github.com/sbwml/packages_lang_golang ${HOME_PATH}/feeds/packages/lang/golang
@@ -293,13 +286,23 @@ gitcon https://github.com/sbwml/packages_lang_golang ${HOME_PATH}/feeds/packages
 # 更换node版本
 gitcon https://github.com/sbwml/feeds_packages_lang_node-prebuilt ${HOME_PATH}/feeds/packages/lang/node
 
-echo '#!/bin/bash' > "${DELETE}" && sudo chmod +x "${DELETE}"
+# store插件依赖
+if [[ -d "${HOME_PATH}/feeds/danshui/relevance/nas-packages/network/services" ]] && [[ ! -d "${HOME_PATH}//package/network/services/ddnsto" ]]; then
+  mv ${HOME_PATH}/feeds/danshui/relevance/nas-packages/network/services/* ${HOME_PATH}/package/network/services
+fi
+if [[ -d "${HOME_PATH}/feeds/danshui/relevance/nas-packages/network/services" ]] && [[ ! -d "${HOME_PATH}/feeds/packages/multimedia/ffmpeg-remux" ]]; then
+  mv ${HOME_PATH}/feeds/danshui/relevance/nas-packages/multimedia/ffmpeg-remux ${HOME_PATH}/feeds/packages/multimedia/ffmpeg-remux
+fi
 
 if [[ "${REPO_BRANCH}" == *"18.06"* ]] || [[ "${REPO_BRANCH}" == *"19.07"* ]] || [[ "${REPO_BRANCH}" == *"21.02"* ]] || [[ "${REPO_BRANCH}" == *"22.03"* ]] || [[ "${REPO_BRANCH}" == *"23.05"* ]]; then
-  giturl https://github.com/281677160/common/blob/9e73637953026dcb94fea245321e63a15e66320c/Share/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/shadowsocks-rust/Makefile
-  giturl https://github.com/281677160/common/blob/9e73637953026dcb94fea245321e63a15e66320c/Share/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/relevance/passwall-packages/shadowsocks-rust/Makefile
-  gitsvn https://github.com/immortalwrt/packages/tree/master/lang/rust ${HOME_PATH}/feeds/packages/lang/rust
+  giturl https://github.com/281677160/common/blob/main/Share/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/shadowsocks-rust/Makefile
   source ${HOME_PATH}/build/common/Share/19.07/netsupport.sh
+fi
+if [[ "${REPO_BRANCH}" == *"18.06"* ]] || [[ "${REPO_BRANCH}" == *"19.07"* ]] || [[ "${REPO_BRANCH}" == *"21.02"* ]]; then
+  gitsvn https://github.com/281677160/common/tree/main/Share/v2raya ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/v2raya
+fi
+if [[ "${REPO_BRANCH}" == *"18.06"* ]] || [[ "${REPO_BRANCH}" == *"19.07"* ]] || [[ "${REPO_BRANCH}" == *"21.02"* ]] || [[ "${REPO_BRANCH}" == *"22.03"* ]]; then
+    rm -rf ${HOME_PATH}/feeds/danshui/luci-app-nikki
 fi
 if [[ ! -d "${HOME_PATH}/feeds/packages/devel/packr" ]]; then
   gitsvn https://github.com/281677160/common/tree/main/Share/packr ${HOME_PATH}/feeds/packages/devel/packr
@@ -307,17 +310,18 @@ fi
 }
 
 
-
 function Diy_Wenjian() {
 # 增加中文语言包
 if [[ -f "${HOME_PATH}/feeds/luci/modules/luci-mod-system/root/usr/share/luci/menu.d/luci-mod-system.json" ]]; then
   LUCI_BANBEN="2"
   echo "LUCI_BANBEN=${LUCI_BANBEN}" >> $GITHUB_ENV
-  gitcon https://github.com/281677160/openwrt-package/tree/Theme2 ${HOME_PATH}/package/Theme-package
+  rm -fr ${HOME_PATH}/package/Theme2
+  git clone -b Theme2 --single-branch https://github.com/281677160/openwrt-package ${HOME_PATH}/package/Theme2
 else
   LUCI_BANBEN="1"
   echo "LUCI_BANBEN=${LUCI_BANBEN}" >> $GITHUB_ENV
-  gitcon https://github.com/281677160/openwrt-package/tree/Theme1 ${HOME_PATH}/package/Theme-package
+  rm -fr ${HOME_PATH}/package/Theme1
+  git clone -b Theme1 --single-branch https://github.com/281677160/openwrt-package ${HOME_PATH}/package/Theme1
 fi
 
 Settings_path="$(find "${HOME_PATH}/package" -type d -name "default-settings")"
@@ -325,7 +329,7 @@ if [[ -z "${Settings_path}" ]] && [[ "${LUCI_BANBEN}" == "2" ]]; then
   gitsvn https://github.com/281677160/common/tree/main/Share/default-settings2 ${HOME_PATH}/package/default-settings
   [[ ! -d "${HOME_PATH}/feeds/luci/libs/luci-lib-base" ]] && sed -i "s/+luci-lib-base //g" ${HOME_PATH}/package/default-settings/Makefile
 elif [[ -z "${Settings_path}" ]] && [[ "${LUCI_BANBEN}" == "1" ]]; then
-  gitsvn https://github.com/281677160/common/tree/main/Share/default-settings2 ${HOME_PATH}/package/default-settings
+  gitsvn https://github.com/281677160/common/tree/main/Share/default-settings1 ${HOME_PATH}/package/default-settings
 fi
 
 ZZZ_PATH="$(find "${HOME_PATH}/package" -type f -name "*-default-settings" |grep files)"
@@ -375,7 +379,6 @@ sed -i 's/root:.*/root:\$5\$XX5H9cuFUqmZU9Vj\$QpkbWUNMZue5VWPek0t0nP3iLSyXXlH7C\
 if [[ `grep -Eoc "admin:.*" ${FILES_PATH}/etc/shadow` -eq '1' ]]; then
   sed -i 's/admin:.*/admin::0:0:99999:7:::/g' ${FILES_PATH}/etc/shadow
 fi
-
 giturl https://github.com/281677160/common/blob/main/custom/Postapplication ${FILES_PATH}/etc/init.d/Postapplication
 giturl https://github.com/281677160/common/blob/main/custom/networkdetection ${FILES_PATH}/etc/init.d/networkdetection
 giturl https://github.com/281677160/common/blob/main/custom/openwrt.sh ${FILES_PATH}/usr/bin/openwrt
@@ -469,21 +472,19 @@ cd ${HOME_PATH}
 
 function Diy_LIENOL() {
 cd ${HOME_PATH}
+gitsvn https://github.com/openwrt/packages/tree/master/net/tailscale ${HOME_PATH}/feeds/packages/net/tailscale
+
 if [[ "${REPO_BRANCH}" == *"19.07"* ]]; then
   gitsvn https://github.com/281677160/common/tree/main/Share/libcap ${HOME_PATH}/feeds/packages/libs/libcap
 fi
-gitsvn https://github.com/openwrt/packages/tree/master/net/tailscale ${HOME_PATH}/feeds/packages/net/tailscale
 if [[ "${REPO_BRANCH}" == *"22.03"* ]]; then
   gitsvn https://github.com/coolsnowwolf/packages/tree/master/libs/pcre2 ${HOME_PATH}/feeds/packages/libs/pcre2
   gitsvn https://github.com/coolsnowwolf/packages/tree/master/libs/glib2 ${HOME_PATH}/feeds/packages/libs/glib2
-  rm -rf ${HOME_PATH}/feeds/luci/luci-app-ntpc
 fi
 if [[ "${REPO_BRANCH}" =~ (19.07|21.02) ]]; then
-  rm -rf ${HOME_PATH}/feeds/danshui/luci-app-nikki
-  rm -rf ${HOME_PATH}/feeds/danshui/relevance/nikki
   gitsvn https://github.com/openwrt/openwrt/tree/openwrt-23.05/tools/cmake ${HOME_PATH}/tools/cmake
-  gitsvn https://github.com/openwrt/packages/tree/openwrt-24.10/lang/ruby ${HOME_PATH}/feeds/packages/lang/ruby
-  gitsvn https://github.com/openwrt/packages/tree/openwrt-24.10/libs/yaml ${HOME_PATH}/feeds/packages/libs/yaml
+  gitsvn https://github.com/openwrt/packages/tree/openwrt-21.02/lang/ruby ${HOME_PATH}/feeds/packages/lang/ruby
+  gitsvn https://github.com/openwrt/packages/tree/openwrt-21.02/libs/yaml ${HOME_PATH}/feeds/packages/libs/yaml
 fi
 [[ -d "${HOME_PATH}/build/common/Share/luci-app-samba4" ]] && rm -rf ${HOME_PATH}/build/common/Share/luci-app-samba4
 amba4="$(find . -type d -name 'luci-app-samba4')"
@@ -522,12 +523,14 @@ fi
 if [[ "${REPO_BRANCH}" == *"19.07"* ]]; then
   gitsvn https://github.com/281677160/common/tree/main/Share/libcap ${HOME_PATH}/feeds/packages/libs/libcap
   gitsvn https://github.com/openwrt/openwrt/tree/openwrt-22.03/package/utils/bcm27xx-userland ${HOME_PATH}/package/utils/bcm27xx-userland
-  rm -rf ${HOME_PATH}/feeds/danshui/luci-app-diskman
 fi
 if [[ "${REPO_BRANCH}" =~ (openwrt-19.07|openwrt-21.02) ]]; then
-  rm -rf ${HOME_PATH}/feeds/danshui/luci-app-nikki
-  rm -rf ${HOME_PATH}/feeds/danshui/relevance/nikki
   gitsvn https://github.com/openwrt/openwrt/tree/openwrt-23.05/tools/cmake ${HOME_PATH}/tools/cmake
+  gitsvn https://github.com/openwrt/packages/tree/openwrt-21.02/lang/ruby ${HOME_PATH}/feeds/packages/lang/ruby
+  gitsvn https://github.com/openwrt/packages/tree/openwrt-21.02/libs/yaml ${HOME_PATH}/feeds/packages/libs/yaml
+fi
+if [[ "${REPO_BRANCH}" == *"main"* ]] || [[ "${REPO_BRANCH}" == *"master"* ]] || [[ "${REPO_BRANCH}" == *"24.10"* ]]; then
+  giturl https://github.com/281677160/common/blob/main/Share/luci-app-nginx-pingos/Makefile ${HOME_PATH}/feeds/danshui/luci-app-nginx-pingos/Makefile
 fi
 }
 
