@@ -273,7 +273,7 @@ git pull
 
 sed -i '/danshui/d' "feeds.conf.default"
 # 这里增加了源,要对应的删除/etc/opkg/distfeeds.conf插件源
-echo "src-git danshui https://github.com/281677160/openwrt-package.git;Lede >> feeds.conf.default
+echo "src-git danshui https://github.com/281677160/openwrt-package.git;Lede” >> feeds.conf.default
 echo "src-git nikki https://github.com/nikkinikki-org/OpenWrt-nikki.git;main" >> feeds.conf.default
 ./scripts/feeds update -a
 
