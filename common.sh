@@ -274,17 +274,28 @@ git pull
 
 sed -i '/danshui/d' "feeds.conf.default"
 # 这里增加了源,要对应的删除/etc/opkg/distfeeds.conf插件源
-echo "src-git danshui https://github.com/281677160/openwrt-package.git;Lede" >> feeds.conf.default
-echo "src-git nikki https://github.com/nikkinikki-org/OpenWrt-nikki.git;main" >> feeds.conf.default
-./scripts/feeds update -a
+echo "src-git danshui https://github.com/281677160/openwrt-package.git;$SOURCE" >> feeds.conf.default
+./scripts/feeds update -a > /dev/null 2>&1
+ 
+z="*luci-theme-argon*,*luci-app-argon-config*,*luci-theme-Butterfly*,*luci-theme-netgear*,*luci-theme-atmaterial*, \
+luci-theme-rosy,luci-theme-darkmatter,luci-theme-infinityfreedom,luci-theme-design,luci-app-design-config, \
+luci-theme-bootstrap-mod,luci-theme-freifunk-generic,luci-theme-opentomato,luci-theme-kucat, \
+luci-app-eqos,adguardhome,luci-app-adguardhome,mosdns,luci-app-mosdns,luci-app-openclash, \
+luci-app-gost,gost,luci-app-smartdns,smartdns,luci-app-wizard,luci-app-msd_lite,msd_lite, \
+luci-app-ssr-plus,*luci-app-passwall*,v2dat,v2ray-geodata,luci-app-wrtbwmon,wrtbwmon,luci-app-wechatpush"
+t=(${z//,/ })
+for x in ${t[@]}; do \
+  find . -type d -name "${x}" |grep -v 'danshui\|freifunk' |xargs -i rm -rf {}; \
+done
 
 
 
 # 更换golang版本
-gitcon https://github.com/sbwml/packages_lang_golang ${HOME_PATH}/feeds/packages/lang/golang
+rm -rf ${HOME_PATH}/feeds/packages/lang/golang
+git clone https://github.com/sbwml/packages_lang_golang -b 24.x ${HOME_PATH}/feeds/packages/lang/golang
 
-# 更换node版本
-gitcon https://github.com/sbwml/feeds_packages_lang_node-prebuilt ${HOME_PATH}/feeds/packages/lang/node
+rm -rf ${HOME_PATH}/feeds/packages/lang/node
+git clone https://github.com/sbwml/feeds_packages_lang_node-prebuilt -b packages-24.10 ${HOME_PATH}/feeds/packages/lang/node
 
 # store插件依赖
 if [[ -d "${HOME_PATH}/feeds/danshui/relevance/nas-packages/network/services" ]] && [[ ! -d "${HOME_PATH}//package/network/services/ddnsto" ]]; then
@@ -294,10 +305,8 @@ if [[ -d "${HOME_PATH}/feeds/danshui/relevance/nas-packages/network/services" ]]
   mv ${HOME_PATH}/feeds/danshui/relevance/nas-packages/multimedia/ffmpeg-remux ${HOME_PATH}/feeds/packages/multimedia/ffmpeg-remux
 fi
 
-if [[ "${REPO_BRANCH}" == *"18.06"* ]] || [[ "${REPO_BRANCH}" == *"19.07"* ]] || [[ "${REPO_BRANCH}" == *"21.02"* ]] || [[ "${REPO_BRANCH}" == *"22.03"* ]] || [[ "${REPO_BRANCH}" == *"23.05"* ]]; then
-  giturl https://github.com/281677160/common/blob/main/Share/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/shadowsocks-rust/Makefile
-  source ${HOME_PATH}/build/common/Share/19.07/netsupport.sh
-fi
+source ${HOME_PATH}/build/common/Share/19.07/netsupport.sh
+
 if [[ "${REPO_BRANCH}" == *"18.06"* ]] || [[ "${REPO_BRANCH}" == *"19.07"* ]] || [[ "${REPO_BRANCH}" == *"21.02"* ]]; then
   gitsvn https://github.com/281677160/common/tree/main/Share/v2raya ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/v2raya
 fi
@@ -532,6 +541,9 @@ fi
 if [[ "${REPO_BRANCH}" == *"main"* ]] || [[ "${REPO_BRANCH}" == *"master"* ]] || [[ "${REPO_BRANCH}" == *"24.10"* ]]; then
   giturl https://github.com/281677160/common/blob/main/Share/luci-app-nginx-pingos/Makefile ${HOME_PATH}/feeds/danshui/luci-app-nginx-pingos/Makefile
 fi
+if [[ "${REPO_BRANCH}" == *"18.06"* ]] || [[ "${REPO_BRANCH}" == *"19.07"* ]] || [[ "${REPO_BRANCH}" == *"21.02"* ]] || [[ "${REPO_BRANCH}" == *"22.03"* ]] || [[ "${REPO_BRANCH}" == *"23.05"* ]]; then
+  giturl https://github.com/281677160/common/blob/main/Share/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/shadowsocks-rust/Makefile
+fi
 }
 
 
@@ -540,12 +552,15 @@ cd ${HOME_PATH}
 source $BUILD_PATH/$DIY_PART_SH
 cd ${HOME_PATH}
 
-#if [[ "${OpenClash_branch}" == "1" ]]; then
-rm -rf ${HOME_PATH}/feeds/danshui/relevance/OpenClashmaster
-#else
-rm -rf ${HOME_PATH}/feeds/danshui/relevance/OpenClashdev
-#fi
 ./scripts/feeds update -a
+
+if [[ "${OpenClash_branch}" == "1" ]]; then
+  rm -fr ${HOME_PATH}/package/OpenClash
+  git clone -b dev --single-branch https://github.com/vernesong/OpenClash ${HOME_PATH}/package/OpenClash
+else
+  rm -fr ${HOME_PATH}/package/OpenClash
+  git clone -b master --single-branch https://github.com/vernesong/OpenClash ${HOME_PATH}/package/OpenClash
+fi
 
 # 正在执行插件语言修改
 if [[ "${LUCI_BANBEN}" == "2" ]]; then
@@ -856,12 +871,12 @@ cd ${HOME_PATH}
 ./scripts/feeds install -a
 
 # 修改nikki升级保留文件列表
-if [[ -f "${HOME_PATH}/feeds/nikki/nikki/files/nikki.upgrade" ]]; then
+if [[ -f "${HOME_PATH}/feeds/danshui/luci-app-nikki/nikki/files/nikki.upgrade" ]]; then
   echo "正在执行：修改nikki升级保留文件列表"
-  echo "/etc/nikki/run/cache.db" >> "feeds/nikki/nikki/files/nikki.upgrade"
-  echo "/etc/nikki/run/ui/" >> "feeds/nikki/nikki/files/nikki.upgrade"
-  echo "/etc/nikki/run/proxies/" >> "feeds/nikki/nikki/files/nikki.upgrade"
-  echo "/etc/nikki/run/rules/" >> "feeds/nikki/nikki/files/nikki.upgrade"
+  echo "/etc/nikki/run/cache.db" >> "feeds/danshui/luci-app-nikki/nikki/files/nikki.upgrade"
+  echo "/etc/nikki/run/ui/" >> "feeds/danshui/luci-app-nikki/nikki/files/nikki.upgrade"
+  echo "/etc/nikki/run/proxies/" >> "feeds/danshui/luci-app-nikki/nikki/files/nikki.upgrade"
+  echo "/etc/nikki/run/rules/" >> "feeds/danshui/luci-app-nikki/nikki/files/nikki.upgrade"
 fi
 
 if [[ ! -f "${HOME_PATH}/staging_dir/host/bin/upx" ]]; then
