@@ -320,19 +320,16 @@ if found_ds=$(find "$A_PATH" -type d -name "default-settings" -print); then
     echo "$found_ds"
 fi
 if [[ -n $(find "$C_PATH" -type f -name "$LUCI_FILE" -print -quit) ]] && [[ -z $found_ds ]]; then
-    echo "条件1：luci存在但default-settings不存在 → 执行命令X"
-    gitsvn https://github.com/281677160/common/tree/main/Share/default-settings2 ${HOME_PATH}/package/default-settings
-    [[ ! -d "${B_PATH}" ]] && sed -i "s/+luci-lib-base //g" ${HOME_PATH}/package/default-settings/Makefile
-    rm -fr ${HOME_PATH}/package/Theme2
-    git clone -b Theme2 --single-branch https://github.com/281677160/openwrt-package ${HOME_PATH}/package/Theme2
+  gitsvn https://github.com/281677160/common/tree/main/Share/default-settings2 ${HOME_PATH}/package/default-settings
+  [[ ! -d "${B_PATH}" ]] && sed -i "s/+luci-lib-base //g" ${HOME_PATH}/package/default-settings/Makefile
+  rm -fr ${HOME_PATH}/package/Theme2
+  git clone -b Theme2 --single-branch https://github.com/281677160/openwrt-package ${HOME_PATH}/package/Theme2
 elif [[ -z $(find "$C_PATH" -type f -name "$LUCI_FILE" -print -quit) ]] && [[ -z $found_ds ]]; then
-    echo "条件2：两者均不存在 → 执行命令Y"
-    gitsvn https://github.com/281677160/common/tree/main/Share/default-settings1 ${HOME_PATH}/package/default-settings
-    rm -fr ${HOME_PATH}/package/Theme1
-    git clone -b Theme1 --single-branch https://github.com/281677160/openwrt-package ${HOME_PATH}/package/Theme1
+  gitsvn https://github.com/281677160/common/tree/main/Share/default-settings1 ${HOME_PATH}/package/default-settings
+  rm -fr ${HOME_PATH}/package/Theme1
+  git clone -b Theme1 --single-branch https://github.com/281677160/openwrt-package ${HOME_PATH}/package/Theme1
 fi
 ZZZ_PATH="$(find "$A_PATH" -name "*-default-settings" -not -path "A/exclude_dir/*" -print)"
-echo "${ZZZ_PATH}"
 
 if [[ -n "${ZZZ_PATH}" ]]; then  
   echo "ZZZ_PATH=${ZZZ_PATH}" >> ${GITHUB_ENV}
@@ -350,7 +347,6 @@ if [[ -n "${ZZZ_PATH}" ]]; then
     cp -Rf "${GENE_PATH}" ${HOME_PATH}/LICENSES/doc/config_generates
   fi
   sed -i "s?main.lang=.*?main.lang='zh_cn'?g" "${ZZZ_PATH}"
-  [[ -n "$(grep "openwrt_banner" "${ZZZ_PATH}")" ]] && sed -i '/openwrt_banner/d' "${ZZZ_PATH}"
 
 cat >> "${ZZZ_PATH}" <<-EOF
 sed -i '/DISTRIB_DESCRIPTION/d' /etc/openwrt_release
