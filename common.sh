@@ -245,7 +245,7 @@ fi
 
 
 function Diy_update() {
-bash <(curl -fsSL https://raw.githubusercontent.com/aihddelyy/common/main/custom/ubuntu.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/281677160/common/main/custom/ubuntu.sh)
 if [[ $? -ne 0 ]];then
   TIME r "依赖安装失败，请检测网络后再次尝试!"
   exit 1
@@ -264,12 +264,6 @@ echo '#!/bin/bash' > "${DELETE}" && sudo chmod +x "${DELETE}"
 [[ ! -d "${HOME_PATH}/LICENSES/doc" ]] && mkdir -p "${HOME_PATH}/LICENSES/doc"
 [[ ! -d "${HOME_PATH}/build_logo" ]] && mkdir -p "${HOME_PATH}/build_logo"
 
-LUCI_CHECKUT="$(git tag -l |grep '^V\|^v' |awk 'END {print}')"
-if [[ -n "${LUCI_CHECKUT}" ]]; then
-  git checkout ${LUCI_CHECKUT}
-  git switch -c ${LUCI_CHECKUT}
-fi
-git pull
 
 
 sed -i '/danshui/d' "feeds.conf.default"
@@ -307,9 +301,6 @@ fi
 
 source ${HOME_PATH}/build/common/Share/19.07/netsupport.sh
 
-if [[ "${REPO_BRANCH}" == *"18.06"* ]] || [[ "${REPO_BRANCH}" == *"19.07"* ]] || [[ "${REPO_BRANCH}" == *"21.02"* ]]; then
-  gitsvn https://github.com/281677160/common/tree/main/Share/v2raya ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/v2raya
-fi
 if [[ "${REPO_BRANCH}" == *"18.06"* ]] || [[ "${REPO_BRANCH}" == *"19.07"* ]] || [[ "${REPO_BRANCH}" == *"21.02"* ]] || [[ "${REPO_BRANCH}" == *"22.03"* ]]; then
     rm -rf ${HOME_PATH}/feeds/danshui/luci-app-nikki
 fi
@@ -321,27 +312,28 @@ fi
 
 function Diy_Wenjian() {
 # 增加中文语言包
-if [[ -f "${HOME_PATH}/feeds/luci/modules/luci-mod-system/root/usr/share/luci/menu.d/luci-mod-system.json" ]]; then
-  LUCI_BANBEN="2"
-  echo "LUCI_BANBEN=${LUCI_BANBEN}" >> $GITHUB_ENV
-  rm -fr ${HOME_PATH}/package/Theme2
-  git clone -b Theme2 --single-branch https://github.com/281677160/openwrt-package ${HOME_PATH}/package/Theme2
-else
-  LUCI_BANBEN="1"
-  echo "LUCI_BANBEN=${LUCI_BANBEN}" >> $GITHUB_ENV
-  rm -fr ${HOME_PATH}/package/Theme1
-  git clone -b Theme1 --single-branch https://github.com/281677160/openwrt-package ${HOME_PATH}/package/Theme1
+A_PATH="${HOME_PATH}/package"
+B_PATH="${HOME_PATH}/feeds/luci/libs/luci-lib-base"
+C_PATH="${HOME_PATH}/feeds/luci/modules/luci-mod-system/root/usr/share/luci/menu.d"
+LUCI_FILE="luci-mod-system.json"
+if found_ds=$(find "$A_PATH" -type d -name "default-settings" -print); then
+    echo "$found_ds"
 fi
-
-Settings_path="$(find "${HOME_PATH}/package" -type d -name "default-settings")"
-if [[ -z "${Settings_path}" ]] && [[ "${LUCI_BANBEN}" == "2" ]]; then
-  gitsvn https://github.com/281677160/common/tree/main/Share/default-settings2 ${HOME_PATH}/package/default-settings
-  [[ ! -d "${HOME_PATH}/feeds/luci/libs/luci-lib-base" ]] && sed -i "s/+luci-lib-base //g" ${HOME_PATH}/package/default-settings/Makefile
-elif [[ -z "${Settings_path}" ]] && [[ "${LUCI_BANBEN}" == "1" ]]; then
-  gitsvn https://github.com/281677160/common/tree/main/Share/default-settings1 ${HOME_PATH}/package/default-settings
+if [[ -n $(find "$C_PATH" -type f -name "$LUCI_FILE" -print -quit) ]] && [[ -z $found_ds ]]; then
+    echo "条件1：luci存在但default-settings不存在 → 执行命令X"
+    gitsvn https://github.com/281677160/common/tree/main/Share/default-settings2 ${HOME_PATH}/package/default-settings
+    [[ ! -d "${B_PATH}" ]] && sed -i "s/+luci-lib-base //g" ${HOME_PATH}/package/default-settings/Makefile
+    rm -fr ${HOME_PATH}/package/Theme2
+    git clone -b Theme2 --single-branch https://github.com/281677160/openwrt-package ${HOME_PATH}/package/Theme2
+elif [[ -z $(find "$C_PATH" -type f -name "$LUCI_FILE" -print -quit) ]] && [[ -z $found_ds ]]; then
+    echo "条件2：两者均不存在 → 执行命令Y"
+    gitsvn https://github.com/281677160/common/tree/main/Share/default-settings1 ${HOME_PATH}/package/default-settings
+    rm -fr ${HOME_PATH}/package/Theme1
+    git clone -b Theme1 --single-branch https://github.com/281677160/openwrt-package ${HOME_PATH}/package/Theme1
 fi
+ZZZ_PATH="$(find "$A_PATH" -name "*-default-settings" -not -path "A/exclude_dir/*" -print)"
+echo "${ZZZ_PATH}"
 
-ZZZ_PATH="$(find "${HOME_PATH}/package" -type f -name "*-default-settings" |grep files)"
 if [[ -n "${ZZZ_PATH}" ]]; then  
   echo "ZZZ_PATH=${ZZZ_PATH}" >> ${GITHUB_ENV}
   sed -i '/exit 0$/d' "${ZZZ_PATH}"
@@ -481,7 +473,6 @@ cd ${HOME_PATH}
 
 function Diy_LIENOL() {
 cd ${HOME_PATH}
-gitsvn https://github.com/openwrt/packages/tree/master/net/tailscale ${HOME_PATH}/feeds/packages/net/tailscale
 
 if [[ "${REPO_BRANCH}" == *"19.07"* ]]; then
   gitsvn https://github.com/281677160/common/tree/main/Share/libcap ${HOME_PATH}/feeds/packages/libs/libcap
@@ -490,11 +481,7 @@ if [[ "${REPO_BRANCH}" == *"22.03"* ]]; then
   gitsvn https://github.com/coolsnowwolf/packages/tree/master/libs/pcre2 ${HOME_PATH}/feeds/packages/libs/pcre2
   gitsvn https://github.com/coolsnowwolf/packages/tree/master/libs/glib2 ${HOME_PATH}/feeds/packages/libs/glib2
 fi
-if [[ "${REPO_BRANCH}" =~ (19.07|21.02) ]]; then
-  gitsvn https://github.com/openwrt/openwrt/tree/openwrt-23.05/tools/cmake ${HOME_PATH}/tools/cmake
-  gitsvn https://github.com/openwrt/packages/tree/openwrt-21.02/lang/ruby ${HOME_PATH}/feeds/packages/lang/ruby
-  gitsvn https://github.com/openwrt/packages/tree/openwrt-21.02/libs/yaml ${HOME_PATH}/feeds/packages/libs/yaml
-fi
+
 [[ -d "${HOME_PATH}/build/common/Share/luci-app-samba4" ]] && rm -rf ${HOME_PATH}/build/common/Share/luci-app-samba4
 amba4="$(find . -type d -name 'luci-app-samba4')"
 autosam="$(find . -type d -name 'autosamba')"
@@ -533,16 +520,8 @@ if [[ "${REPO_BRANCH}" == *"19.07"* ]]; then
   gitsvn https://github.com/281677160/common/tree/main/Share/libcap ${HOME_PATH}/feeds/packages/libs/libcap
   gitsvn https://github.com/openwrt/openwrt/tree/openwrt-22.03/package/utils/bcm27xx-userland ${HOME_PATH}/package/utils/bcm27xx-userland
 fi
-if [[ "${REPO_BRANCH}" =~ (openwrt-19.07|openwrt-21.02) ]]; then
-  gitsvn https://github.com/openwrt/openwrt/tree/openwrt-23.05/tools/cmake ${HOME_PATH}/tools/cmake
-  gitsvn https://github.com/openwrt/packages/tree/openwrt-21.02/lang/ruby ${HOME_PATH}/feeds/packages/lang/ruby
-  gitsvn https://github.com/openwrt/packages/tree/openwrt-21.02/libs/yaml ${HOME_PATH}/feeds/packages/libs/yaml
-fi
 if [[ "${REPO_BRANCH}" == *"main"* ]] || [[ "${REPO_BRANCH}" == *"master"* ]] || [[ "${REPO_BRANCH}" == *"24.10"* ]]; then
   giturl https://github.com/281677160/common/blob/main/Share/luci-app-nginx-pingos/Makefile ${HOME_PATH}/feeds/danshui/luci-app-nginx-pingos/Makefile
-fi
-if [[ "${REPO_BRANCH}" == *"18.06"* ]] || [[ "${REPO_BRANCH}" == *"19.07"* ]] || [[ "${REPO_BRANCH}" == *"21.02"* ]] || [[ "${REPO_BRANCH}" == *"22.03"* ]] || [[ "${REPO_BRANCH}" == *"23.05"* ]]; then
-  giturl https://github.com/281677160/common/blob/main/Share/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/shadowsocks-rust/Makefile
 fi
 }
 
