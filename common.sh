@@ -120,6 +120,8 @@ COOLSNOWWOLF)
   export SOURCE_OWNER="Lean's"
   export LUCI_EDITION="23.05"
   export DIY_WORK="${FOLDER_NAME}$(echo "${LUCI_EDITION}" |sed "s/\.//g" |sed "s/\-//g")"
+  export FEEDS_CONF="$REPO_URL/blob/$REPO_BRANCH/feeds.conf.default"
+  export BASE_FILES="$REPO_URL/blob/$REPO_BRANCH/package/base-files/luci2/bin/config_generate"
 ;;
 LIENOL)
   export REPO_URL="https://github.com/Lienol/openwrt"
@@ -127,21 +129,27 @@ LIENOL)
   export SOURCE_OWNER="Lienol's"
   export LUCI_EDITION="$(echo "${REPO_BRANCH}" |sed 's/openwrt-//g')"
   export DIY_WORK="${FOLDER_NAME}$(echo "${LUCI_EDITION}" |sed "s/\.//g" |sed "s/\-//g")"
+  export FEEDS_CONF="$REPO_URL/blob/$REPO_BRANCH/feeds.conf.default"
+  export BASE_FILES="$REPO_URL/blob/$REPO_BRANCH/package/base-files/files/bin/config_generate"
 ;;
 IMMORTALWRT)
   if [[ "${REPO_BRANCH}" == "mt798x" ]]; then
-    export REPO_URL="https://github.com/padavanonly/immortalwrt-mt798x-23.05"
+    export REPO_URL="https://github.com/padavanonly/immortalwrt-mt798x-24.10"
     export SOURCE="Immortalwrt"
     export SOURCE_OWNER="padavanonly's"
     export LUCI_EDITION="mt798x"
-    export DIY_WORK="padavanonly23.05"
+    export DIY_WORK="padavanonly2410"
     export REPO_BRANCH="openwrt-23.05"
+    export FEEDS_CONF="$REPO_URL/blob/openwrt-23.05/feeds.conf.default"
+    export BASE_FILES="$REPO_URL/blob/openwrt-23.05/package/base-files/files/bin/config_generate"
   else
     export REPO_URL="https://github.com/immortalwrt/immortalwrt"
     export SOURCE="Immortalwrt"
     export SOURCE_OWNER="ctcgfw's"
     export LUCI_EDITION="$(echo "${REPO_BRANCH}" |sed 's/openwrt-//g')"
     export DIY_WORK="${FOLDER_NAME}$(echo "${LUCI_EDITION}" |sed "s/\.//g" |sed "s/\-//g")"
+    export FEEDS_CONF="$REPO_URL/blob/$REPO_BRANCH/feeds.conf.default"
+    export BASE_FILES="$REPO_URL/blob/$REPO_BRANCH/package/base-files/files/bin/config_generate"
   fi
 ;;
 XWRT)
@@ -150,6 +158,8 @@ XWRT)
   export SOURCE_OWNER="ptpt52's"
   export LUCI_EDITION="${REPO_BRANCH}"
   export DIY_WORK="${FOLDER_NAME}$(echo "${LUCI_EDITION}" |sed "s/\.//g" |sed "s/\-//g")"
+  export FEEDS_CONF="$REPO_URL/blob/$REPO_BRANCH/feeds.conf.default"
+  export BASE_FILES="$REPO_URL/blob/$REPO_BRANCH/package/base-files/files/bin/config_generate"
 ;;
 OFFICIAL)
   export REPO_URL="https://github.com/openwrt/openwrt"
@@ -157,6 +167,8 @@ OFFICIAL)
   export SOURCE_OWNER="openwrt's"
   export LUCI_EDITION="$(echo "${REPO_BRANCH}" |sed 's/openwrt-//g')"
   export DIY_WORK="${FOLDER_NAME}$(echo "${LUCI_EDITION}" |sed "s/\.//g" |sed "s/\-//g")"
+  export FEEDS_CONF="$REPO_URL/blob/$REPO_BRANCH/feeds.conf.default"
+  export BASE_FILES="$REPO_URL/blob/$REPO_BRANCH/package/base-files/files/bin/config_generate"
 ;;
 *)
   TIME r "不支持${SOURCE_CODE}此源码，当前只支持COOLSNOWWOLF、LIENOL、IMMORTALWRT、XWRT、OFFICIAL"
@@ -198,6 +210,10 @@ echo "Firmware_Date=$(date +%Y-%m%d-%H%M)" >> ${GITHUB_ENV}
 echo "Compte_Date=$(date +%Y年%m月%d号%H时%M分)" >> ${GITHUB_ENV}
 echo "Tongzhi_Date=$(date +%Y年%m月%d日)" >> ${GITHUB_ENV}
 echo "Gujian_Date=$(date +%m.%d)" >> ${GITHUB_ENV}
+echo "FEEDS_CONF=${FEEDS_CONF}" >> ${GITHUB_ENV}
+echo "BASE_FILES=${BASE_FILES}" >> ${GITHUB_ENV}
+echo "UPGRADE_KEEP=${REPO_URL}/blob/${REPO_BRANCH}/package/base-files/files/lib/upgrade/keep.d/base-files-essential" >> ${GITHUB_ENV}
+echo "TARGET_MK=${REPO_URL}/blob/${REPO_BRANCH}/include/target.mk" >> ${GITHUB_ENV}
 if [[ ${SOURCE_CODE} == "COOLSNOWWOLF" ]]; then
   echo "GENE_PATH=${GITHUB_WORKSPACE}/openwrt/package/base-files/luci2/bin/config_generate" >> ${GITHUB_ENV}
 else
@@ -259,11 +275,31 @@ fi
 function Diy_checkout() {
 # 下载源码后，进行源码微调和增加插件源
 cd ${HOME_PATH}
+# 增加一些应用
+# giturl ${FEEDS_CONF} ${HOME_PATH}/feeds.conf.default
+giturl ${BASE_FILES} ${GENE_PATH}
+giturl ${UPGRADE_KEEP} ${KEEPD_PATH}
+giturl ${TARGET_MK} ${HOME_PATH}/include/target.mk
+giturl https://github.com/281677160/common/blob/main/custom/default-setting ${DEFAULT_PATH}
+giturl https://github.com/281677160/common/blob/main/custom/Postapplication ${FILES_PATH}/etc/init.d/Postapplication
+giturl https://github.com/281677160/common/blob/main/custom/networkdetection ${FILES_PATH}/etc/init.d/networkdetection
+giturl https://github.com/281677160/common/blob/main/custom/openwrt.sh ${FILES_PATH}/usr/bin/openwrt
+
+sed -i "s?112233?${SOURCE} - ${LUCI_EDITION}?g" "${DEFAULT_PATH}" > /dev/null 2>&1
+sed -i 's/root:.*/root:\$5\$XX5H9cuFUqmZU9Vj\$QpkbWUNMZue5VWPek0t0nP3iLSyXXlH7C\/qEBtZFaV9:20156:0:99999:7:::/g' ${FILES_PATH}/etc/shadow
+grep -q "admin:" ${FILES_PATH}/etc/shadow && sed -i 's/admin:.*/admin::0:0:99999:7:::/g' ${FILES_PATH}/etc/shadow
+
 echo '#!/bin/bash' > "${DELETE}" && sudo chmod +x "${DELETE}"
 [[ -d "${HOME_PATH}/doc" ]] && rm -rf ${HOME_PATH}/doc
 [[ ! -d "${HOME_PATH}/LICENSES/doc" ]] && mkdir -p "${HOME_PATH}/LICENSES/doc"
 [[ ! -d "${HOME_PATH}/build_logo" ]] && mkdir -p "${HOME_PATH}/build_logo"
 
+LUCI_CHECKUT="$(git tag -l |grep '^V\|^v' |awk 'END {print}')"
+if [[ -n "${LUCI_CHECKUT}" ]]; then
+  git checkout ${LUCI_CHECKUT}
+  git switch -c ${LUCI_CHECKUT}
+fi
+git pull
 
 
 sed -i '/danshui/d' "feeds.conf.default"
@@ -271,25 +307,21 @@ sed -i '/danshui/d' "feeds.conf.default"
 echo "src-git danshui https://github.com/281677160/openwrt-package.git;$SOURCE" >> feeds.conf.default
 ./scripts/feeds update -a > /dev/null 2>&1
  
-z="*luci-theme-argon*,*luci-app-argon-config*,*luci-theme-Butterfly*,*luci-theme-netgear*,*luci-theme-atmaterial*, \
-luci-theme-rosy,luci-theme-darkmatter,luci-theme-infinityfreedom,luci-theme-design,luci-app-design-config, \
-luci-theme-bootstrap-mod,luci-theme-freifunk-generic,luci-theme-opentomato,luci-theme-kucat, \
-luci-app-eqos,adguardhome,luci-app-adguardhome,mosdns,luci-app-mosdns,luci-app-openclash, \
-luci-app-gost,gost,luci-app-smartdns,smartdns,luci-app-wizard,luci-app-msd_lite,msd_lite, \
-luci-app-ssr-plus,*luci-app-passwall*,v2dat,v2ray-geodata,luci-app-wrtbwmon,wrtbwmon,luci-app-wechatpush"
-t=(${z//,/ })
-for x in ${t[@]}; do \
-  find . -type d -name "${x}" |grep -v 'danshui\|freifunk' |xargs -i rm -rf {}; \
-done
+ z="*luci-theme-argon*,*luci-app-argon-config*,*luci-theme-Butterfly*,*luci-theme-netgear*,*luci-theme-atmaterial*, \
+ luci-theme-rosy,luci-theme-darkmatter,luci-theme-infinityfreedom,luci-theme-design,luci-app-design-config, \
+ luci-theme-bootstrap-mod,luci-theme-freifunk-generic,luci-theme-opentomato,luci-theme-kucat, \
+ luci-app-eqos,adguardhome,luci-app-adguardhome,mosdns,luci-app-mosdns,luci-app-openclash, \
+ luci-app-gost,gost,luci-app-smartdns,smartdns,luci-app-wizard,luci-app-msd_lite,msd_lite, \
+ luci-app-ssr-plus,*luci-app-passwall*,v2dat,v2ray-geodata,luci-app-wrtbwmon,wrtbwmon, \
+ luci-app-wechatpush,v2ray-core,v2ray-plugin,v2raya,xray-core,xray-plugin,luci-app-alist,alist"
+ t=(${z//,/ })
+ for x in ${t[@]}; do \
+   find . -type d -name "${x}" |grep -v 'danshui\|freifunk' |xargs -i rm -rf {}; \
+ done
 
-
-
-# 更换golang版本
-rm -rf ${HOME_PATH}/feeds/packages/lang/golang
-git clone https://github.com/sbwml/packages_lang_golang -b 24.x ${HOME_PATH}/feeds/packages/lang/golang
-
-rm -rf ${HOME_PATH}/feeds/packages/lang/node
-git clone https://github.com/sbwml/feeds_packages_lang_node-prebuilt -b packages-24.10 ${HOME_PATH}/feeds/packages/lang/node
+# 更换golang和node版本
+gitcon https://github.com/sbwml/packages_lang_golang ${HOME_PATH}/feeds/packages/lang/golang
+gitcon https://github.com/sbwml/feeds_packages_lang_node-prebuilt ${HOME_PATH}/feeds/packages/lang/node
 
 # store插件依赖
 if [[ -d "${HOME_PATH}/feeds/danshui/relevance/nas-packages/network/services" ]] && [[ ! -d "${HOME_PATH}//package/network/services/ddnsto" ]]; then
@@ -299,16 +331,24 @@ if [[ -d "${HOME_PATH}/feeds/danshui/relevance/nas-packages/network/services" ]]
   mv ${HOME_PATH}/feeds/danshui/relevance/nas-packages/multimedia/ffmpeg-remux ${HOME_PATH}/feeds/packages/multimedia/ffmpeg-remux
 fi
 
-source ${HOME_PATH}/build/common/Share/19.07/netsupport.sh
+if [[ "${REPO_BRANCH}" == *"18.06"* ]] || [[ "${REPO_BRANCH}" == *"19.07"* ]] || [[ "${REPO_BRANCH}" == *"21.02"* ]]; then
+  gitsvn https://github.com/281677160/common/tree/main/Share/v2raya ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/v2raya
+  source ${HOME_PATH}/build/common/Share/19.07/netsupport.sh
+fi
 
-if [[ "${REPO_BRANCH}" == *"18.06"* ]] || [[ "${REPO_BRANCH}" == *"19.07"* ]] || [[ "${REPO_BRANCH}" == *"21.02"* ]] || [[ "${REPO_BRANCH}" == *"22.03"* ]]; then
+if [[ ! -d "${HOME_PATH}/package/network/config/firewall4" ]]; then
     rm -rf ${HOME_PATH}/feeds/danshui/luci-app-nikki
 fi
+
+if [[ ! -d "${HOME_PATH}/feeds/packages/lang/rust" ]]; then
+    gitsvn https://github.com/openwrt/packages/tree/openwrt-23.05/lang/rust ${HOME_PATH}/feeds/packages/lang/rust
+fi
+
 if [[ ! -d "${HOME_PATH}/feeds/packages/devel/packr" ]]; then
   gitsvn https://github.com/281677160/common/tree/main/Share/packr ${HOME_PATH}/feeds/packages/devel/packr
 fi
-}
 
+<<<<<<< HEAD
 
 function Diy_Wenjian() {
 # 增加中文语言包
@@ -359,37 +399,70 @@ echo "luciversion    = \"${LUCI_EDITION}\"" >> /usr/lib/lua/luci/version.lua
 sed -i '/luciname/d' /usr/lib/lua/luci/version.lua
 echo "luciname    = \"${SOURCE}\"" >> /usr/lib/lua/luci/version.lua
 EOF
+=======
+if [[ "${REPO_BRANCH}" == *"18.06"* ]] || [[ "${REPO_BRANCH}" == *"19.07"* ]] || [[ "${REPO_BRANCH}" == *"21.02"* ]] || [[ "${REPO_BRANCH}" == *"22.03"* ]]; then
+  giturl https://github.com/281677160/common/blob/main/Share/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/shadowsocks-rust/Makefile
+>>>>>>> 21898b6dea2116e1c10dd10b313450e3040d1081
 fi
 
+# N1类型固件修改增加固件名
 if [[ -d "${HOME_PATH}/target/linux/armsr" ]]; then
   features_file="${HOME_PATH}/target/linux/armsr/Makefile"
 elif [[ -d "${HOME_PATH}/target/linux/armvirt" ]]; then
   features_file="${HOME_PATH}/target/linux/armvirt/Makefile"
 fi
 [[ -n "${features_file}" ]] && sed -i "s?FEATURES+=.*?FEATURES+=targz?g" "${features_file}"
-sed -i '/DISTRIB_SOURCECODE/d' "${REPAIR_PATH}"
-echo -e "\nDISTRIB_SOURCECODE='${SOURCE}_${LUCI_EDITION}'" >> "${REPAIR_PATH}" && sed -i '/^\s*$/d' "${REPAIR_PATH}"
 
-# 增加一些应用
-cp -Rf ${HOME_PATH}/build/common/custom/default-setting "${DEFAULT_PATH}"
-sudo chmod +x "${DEFAULT_PATH}"
-sed -i '/exit 0$/d' "${DEFAULT_PATH}"
-sed -i "s?112233?${SOURCE} - ${LUCI_EDITION}?g" "${DEFAULT_PATH}" > /dev/null 2>&1
-sed -i 's/root:.*/root:\$5\$XX5H9cuFUqmZU9Vj\$QpkbWUNMZue5VWPek0t0nP3iLSyXXlH7C\/qEBtZFaV9:20156:0:99999:7:::/g' ${FILES_PATH}/etc/shadow
-if [[ `grep -Eoc "admin:.*" ${FILES_PATH}/etc/shadow` -eq '1' ]]; then
-  sed -i 's/admin:.*/admin::0:0:99999:7:::/g' ${FILES_PATH}/etc/shadow
-fi
-giturl https://github.com/281677160/common/blob/main/custom/Postapplication ${FILES_PATH}/etc/init.d/Postapplication
-giturl https://github.com/281677160/common/blob/main/custom/networkdetection ${FILES_PATH}/etc/init.d/networkdetection
-giturl https://github.com/281677160/common/blob/main/custom/openwrt.sh ${FILES_PATH}/usr/bin/openwrt
+cat >> "${DEFAULT_PATH}" <<-EOF
+sed -i '/DISTRIB_DESCRIPTION/d' /etc/openwrt_release
+echo "DISTRIB_DESCRIPTION='OpenWrt '" >> /etc/openwrt_release
+sed -i '/DISTRIB_SOURCECODE/d' /etc/openwrt_release
+echo "DISTRIB_SOURCECODE='${SOURCE}_${LUCI_EDITION}'" >> /etc/openwrt_release
+sed -i '/luciversion/d' /usr/lib/lua/luci/version.lua
+echo "luciversion    = \"${LUCI_EDITION}\"" >> /usr/lib/lua/luci/version.lua
+sed -i '/luciname/d' /usr/lib/lua/luci/version.lua
+echo "luciname    = \"${SOURCE}\"" >> /usr/lib/lua/luci/version.lua
+EOF
 
 # 给固件保留配置更新固件的保留项目
-if [[ -z "$(grep "background" ${KEEPD_PATH})" ]]; then
 cat >>"${KEEPD_PATH}" <<-EOF
 /etc/config/AdGuardHome.yaml
 /www/luci-static/argon/background/
 /etc/smartdns/custom.conf
 EOF
+}
+
+
+function Diy_Wenjian() {
+# 增加中文语言包
+A_PATH="$HOME_PATH/package"
+B_PATH="$HOME_PATH/feeds/luci/libs/luci-lib-base"
+C_PATH="$HOME_PATH/feeds/luci/modules/luci-mod-system/root/usr/share/luci/menu.d"
+LUCI_FILE="luci-mod-system.json"
+echo "LUCI_BANBEN=$C_PATH/$LUCI_FILE" >> $GITHUB_ENV
+if found_ds=$(find "$A_PATH" -type d -name "default-settings" -print); then
+    found_ds="$found_ds"
+fi
+if [[ -n $(find "$C_PATH" -type f -name "$LUCI_FILE" -print -quit) ]] && [[ -z $found_ds ]]; then
+  gitsvn https://github.com/281677160/common/tree/main/Share/default-settings2 ${HOME_PATH}/package/default-settings
+  [[ ! -d "${B_PATH}" ]] && sed -i "s/+luci-lib-base //g" ${HOME_PATH}/package/default-settings/Makefile
+  gitcon https://github.com/281677160/openwrt-package/tree/Theme2 ${HOME_PATH}/package/Theme2
+elif [[ -z $(find "$C_PATH" -type f -name "$LUCI_FILE" -print -quit) ]] && [[ -z $found_ds ]]; then
+  gitsvn https://github.com/281677160/common/tree/main/Share/default-settings1 ${HOME_PATH}/package/default-settings
+  gitcon https://github.com/281677160/openwrt-package/tree/Theme1 ${HOME_PATH}/package/Theme1
+fi
+ZZZ_PATH="$(find "$A_PATH" -name "*-default-settings" -not -path "A/exclude_dir/*" -print)"
+
+if [[ -n "${ZZZ_PATH}" ]]; then  
+  echo "ZZZ_PATH=${ZZZ_PATH}" >> ${GITHUB_ENV}
+  if [[ -f "${HOME_PATH}/LICENSES/doc/default-settings" ]]; then
+    cp -Rf ${HOME_PATH}/LICENSES/doc/default-settings "${ZZZ_PATH}"
+  else
+    cp -Rf "${ZZZ_PATH}" ${HOME_PATH}/LICENSES/doc/default-settings
+  fi
+  
+  sed -i '/exit 0$/d' "${ZZZ_PATH}"
+  sed -i "s?main.lang=.*?main.lang='zh_cn'?g" "${ZZZ_PATH}"
 fi
 
 # 修改一些依赖
@@ -472,6 +545,8 @@ cd ${HOME_PATH}
 
 function Diy_LIENOL() {
 cd ${HOME_PATH}
+gitsvn https://github.com/openwrt/packages/tree/master/net/tailscale ${HOME_PATH}/feeds/packages/net/tailscale
+[[ -d "${HOME_PATH}/feeds/danshui/relevance/mt" ]] && rm -fr ${HOME_PATH}/feeds/other/lean/mt
 
 if [[ "${REPO_BRANCH}" == *"19.07"* ]]; then
   gitsvn https://github.com/281677160/common/tree/main/Share/libcap ${HOME_PATH}/feeds/packages/libs/libcap
@@ -480,7 +555,14 @@ if [[ "${REPO_BRANCH}" == *"22.03"* ]]; then
   gitsvn https://github.com/coolsnowwolf/packages/tree/master/libs/pcre2 ${HOME_PATH}/feeds/packages/libs/pcre2
   gitsvn https://github.com/coolsnowwolf/packages/tree/master/libs/glib2 ${HOME_PATH}/feeds/packages/libs/glib2
 fi
-
+if [[ "${REPO_BRANCH}" =~ (19.07|21.02) ]]; then
+  gitsvn https://github.com/openwrt/openwrt/tree/openwrt-23.05/tools/cmake ${HOME_PATH}/tools/cmake
+  gitsvn https://github.com/openwrt/packages/tree/openwrt-21.02/lang/ruby ${HOME_PATH}/feeds/packages/lang/ruby
+  gitsvn https://github.com/openwrt/packages/tree/openwrt-21.02/libs/yaml ${HOME_PATH}/feeds/packages/libs/yaml
+fi
+if [[ "${REPO_BRANCH}" == *"23.05"* ]]; then
+  giturl https://github.com/281677160/common/blob/main/Share/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/shadowsocks-rust/Makefile
+fi
 [[ -d "${HOME_PATH}/build/common/Share/luci-app-samba4" ]] && rm -rf ${HOME_PATH}/build/common/Share/luci-app-samba4
 amba4="$(find . -type d -name 'luci-app-samba4')"
 autosam="$(find . -type d -name 'autosamba')"
@@ -519,6 +601,11 @@ if [[ "${REPO_BRANCH}" == *"19.07"* ]]; then
   gitsvn https://github.com/281677160/common/tree/main/Share/libcap ${HOME_PATH}/feeds/packages/libs/libcap
   gitsvn https://github.com/openwrt/openwrt/tree/openwrt-22.03/package/utils/bcm27xx-userland ${HOME_PATH}/package/utils/bcm27xx-userland
 fi
+if [[ "${REPO_BRANCH}" =~ (openwrt-19.07|openwrt-21.02) ]]; then
+  gitsvn https://github.com/openwrt/openwrt/tree/openwrt-23.05/tools/cmake ${HOME_PATH}/tools/cmake
+  gitsvn https://github.com/openwrt/packages/tree/openwrt-21.02/lang/ruby ${HOME_PATH}/feeds/packages/lang/ruby
+  gitsvn https://github.com/openwrt/packages/tree/openwrt-21.02/libs/yaml ${HOME_PATH}/feeds/packages/libs/yaml
+fi
 if [[ "${REPO_BRANCH}" == *"main"* ]] || [[ "${REPO_BRANCH}" == *"master"* ]] || [[ "${REPO_BRANCH}" == *"24.10"* ]]; then
   giturl https://github.com/281677160/common/blob/main/Share/luci-app-nginx-pingos/Makefile ${HOME_PATH}/feeds/danshui/luci-app-nginx-pingos/Makefile
 fi
@@ -541,7 +628,7 @@ else
 fi
 
 # 正在执行插件语言修改
-if [[ "${LUCI_BANBEN}" == "2" ]]; then
+if [[ -f "${LUCI_BANBEN}" ]]; then
   cp -Rf ${HOME_PATH}/build/common/language/zh_Hans.sh ${HOME_PATH}/zh_Hans.sh
   /bin/bash zh_Hans.sh && rm -rf zh_Hans.sh
 else
@@ -2067,9 +2154,9 @@ if [[ -n "${url}" ]]; then
         rm -rf "${content}"
     fi
     
-    wget -q --show-progress "${url}" -O "${content}"
+    curl -# -L "${url}" -o "${content}"
     if [[ ! -s "${content}" ]]; then
-        curl -# -L "${url}" -o "${content}"
+        wget -q --show-progress "${url}" -O "${content}"
         if [[ ! -s "${content}" ]]; then
             echo "${A}文件下载失败,请检查网络,或查看链接正确性"
         else
