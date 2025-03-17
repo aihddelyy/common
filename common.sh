@@ -312,25 +312,27 @@ fi
 
 function Diy_Wenjian() {
 # 增加中文语言包
-A_PATH="${HOME_PATH}/package"
-B_PATH="${HOME_PATH}/feeds/luci/libs/luci-lib-base"
-C_PATH="${HOME_PATH}/feeds/luci/modules/luci-mod-system/root/usr/share/luci/menu.d"
-LUCI_FILE="luci-mod-system.json"
-if found_ds=$(find "$A_PATH" -type d -name "default-settings" -print); then
-    echo "$found_ds"
-fi
-if [[ -n $(find "$C_PATH" -type f -name "$LUCI_FILE" -print -quit) ]] && [[ -z $found_ds ]]; then
-  gitsvn https://github.com/281677160/common/tree/main/Share/default-settings2 ${HOME_PATH}/package/default-settings
-  [[ ! -d "${B_PATH}" ]] && sed -i "s/+luci-lib-base //g" ${HOME_PATH}/package/default-settings/Makefile
+if [[ -f "${HOME_PATH}/feeds/luci/modules/luci-mod-system/root/usr/share/luci/menu.d/luci-mod-system.json" ]]; then
+  LUCI_BANBEN="2"
+  echo "LUCI_BANBEN=${LUCI_BANBEN}" >> $GITHUB_ENV
   rm -fr ${HOME_PATH}/package/Theme2
   git clone -b Theme2 --single-branch https://github.com/281677160/openwrt-package ${HOME_PATH}/package/Theme2
-elif [[ -z $(find "$C_PATH" -type f -name "$LUCI_FILE" -print -quit) ]] && [[ -z $found_ds ]]; then
-  gitsvn https://github.com/281677160/common/tree/main/Share/default-settings1 ${HOME_PATH}/package/default-settings
+else
+  LUCI_BANBEN="1"
+  echo "LUCI_BANBEN=${LUCI_BANBEN}" >> $GITHUB_ENV
   rm -fr ${HOME_PATH}/package/Theme1
   git clone -b Theme1 --single-branch https://github.com/281677160/openwrt-package ${HOME_PATH}/package/Theme1
 fi
-ZZZ_PATH="$(find "$A_PATH" -name "*-default-settings" -not -path "A/exclude_dir/*" -print)"
 
+Settings_path="$(find "${HOME_PATH}/package" -type d -name "default-settings")"
+if [[ -z "${Settings_path}" ]] && [[ "${LUCI_BANBEN}" == "2" ]]; then
+  gitsvn https://github.com/281677160/common/tree/main/Share/default-settings2 ${HOME_PATH}/package/default-settings
+  [[ ! -d "${HOME_PATH}/feeds/luci/libs/luci-lib-base" ]] && sed -i "s/+luci-lib-base //g" ${HOME_PATH}/package/default-settings/Makefile
+elif [[ -z "${Settings_path}" ]] && [[ "${LUCI_BANBEN}" == "1" ]]; then
+  gitsvn https://github.com/281677160/common/tree/main/Share/default-settings1 ${HOME_PATH}/package/default-settings
+fi
+
+ZZZ_PATH="$(find "${HOME_PATH}/package" -type f -name "*-default-settings" |grep files)"
 if [[ -n "${ZZZ_PATH}" ]]; then  
   echo "ZZZ_PATH=${ZZZ_PATH}" >> ${GITHUB_ENV}
   sed -i '/exit 0$/d' "${ZZZ_PATH}"
@@ -347,6 +349,7 @@ if [[ -n "${ZZZ_PATH}" ]]; then
     cp -Rf "${GENE_PATH}" ${HOME_PATH}/LICENSES/doc/config_generates
   fi
   sed -i "s?main.lang=.*?main.lang='zh_cn'?g" "${ZZZ_PATH}"
+  [[ -n "$(grep "openwrt_banner" "${ZZZ_PATH}")" ]] && sed -i '/openwrt_banner/d' "${ZZZ_PATH}"
 
 cat >> "${ZZZ_PATH}" <<-EOF
 sed -i '/DISTRIB_DESCRIPTION/d' /etc/openwrt_release
