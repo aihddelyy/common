@@ -21,7 +21,7 @@ fi
 
 if [[ -f "/usr/lib/os-release" ]]; then
 	# sed -i 's?RELEASE=".*"?RELEASE="Customized_Information @ OpenWrt"?g' /usr/lib/os-release
-	sed -i 's?RELEASE=".*"?RELEASE="Customized_Information @ OpenWrt $DISTRIBREVISION"?g' /usr/lib/os-release
+	sed -i "s/RELEASE=\".*\"/RELEASE=\"Customized_Information @ OpenWrt $DISTRIBREVISION\"/g" /usr/lib/os-release
 fi
 
 if [[ -f "/usr/share/ucode/luci/version.uc" ]]; then
