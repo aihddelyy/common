@@ -280,7 +280,7 @@ if ! grep -q "auto-scripts" "${HOME_PATH}/Config.in"; then
   echo 'source "package/auto-scripts/Config.in"' >> ${HOME_PATH}/Config.in
 fi
 
-sed -i "s/\bSOURCE\b/${SOURCE}/g" "${DEFAULT_PATH}"
+sed -i "s/SOURCE\([^C]\|$\)/${SOURCE}\1/g" "${DEFAULT_PATH}"
 sed -i "s/LUCI_EDITION/${LUCI_EDITION}/g" "${DEFAULT_PATH}"
 sed -i 's/root:.*/root:\$5\$XX5H9cuFUqmZU9Vj\$QpkbWUNMZue5VWPek0t0nP3iLSyXXlH7C\/qEBtZFaV9:20156:0:99999:7:::/g' ${FILES_PATH}/etc/shadow
 grep -q "admin:" ${FILES_PATH}/etc/shadow && sed -i 's/admin:.*/admin::0:0:99999:7:::/g' ${FILES_PATH}/etc/shadow
