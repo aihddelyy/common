@@ -275,7 +275,7 @@ curl -fsSL "${FEEDS_CONF}" -o "${HOME_PATH}/feeds.conf.default"
 curl -fsSL "${BASE_FILES}" -o "${GENE_PATH}"
 curl -fsSL "${UPGRADE_KEEP}" -o "${KEEPD_PATH}"
 curl -fsSL "${TARGET_MK}" -o "${HOME_PATH}/include/target.mk"
-gitsvn https://github.com/281677160/common/tree/main/auto-scripts ${HOME_PATH}/package/auto-scripts
+gitsvn https://github.com/aihddelyy/common/tree/main/auto-scripts ${HOME_PATH}/package/auto-scripts
 if ! grep -q "auto-scripts" "${HOME_PATH}/Config.in"; then
   echo 'source "package/auto-scripts/Config.in"' >> ${HOME_PATH}/Config.in
 fi
