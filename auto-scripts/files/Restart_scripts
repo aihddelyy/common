@@ -1,0 +1,16 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+
+start() {
+    /etc/init.d/uhttpd restart
+    /etc/init.d/network restart
+    /etc/init.d/dnsmasq restart
+    /etc/init.d/system restart
+    rm -rf /tmp/luci-*cache* > /dev/null 2>&1
+    /etc/scripts_reboot
+}
+
+stop() {
+    echo "Service stopped."
+}

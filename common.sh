@@ -3,13 +3,9 @@
 # common Module by 28677160
 # matrix.target=${FOLDER_NAME}
 
-ACTIONS_VERSION="1.0.7"
-
-function TIME() {
+ACTIONS_VERSION="1.0.8"
 Compte=$(date +%Y年%m月%d号%H时%M分)
-  [[ -z "$1" ]] && {
-    echo -ne " "
-    } || {
+function TIME() {
     case $1 in
     r) export Color="\e[31m";;
     g) export Color="\e[32m";;
@@ -18,10 +14,7 @@ Compte=$(date +%Y年%m月%d号%H时%M分)
     z) export Color="\e[35m";;
     l) export Color="\e[36m";;
     esac
-      [[ $# -lt 2 ]] && echo -e "\e[36m\e[0m ${1}" || {
-        echo -e "\e[36m\e[0m ${Color}${2}\e[0m"
-      }
-    }
+    echo -e "\e[36m\e[0m ${Color}${2}\e[0m"
 }
 
 function settings_variable() {
@@ -273,6 +266,7 @@ else
 fi
 }
 
+
 function Diy_checkout() {
 # 下载源码后，进行源码微调和增加插件源
 cd ${HOME_PATH}
@@ -282,8 +276,11 @@ curl -fsSL "${BASE_FILES}" -o "${GENE_PATH}"
 curl -fsSL "${UPGRADE_KEEP}" -o "${KEEPD_PATH}"
 curl -fsSL "${TARGET_MK}" -o "${HOME_PATH}/include/target.mk"
 gitsvn https://github.com/281677160/common/tree/main/auto-scripts ${HOME_PATH}/package/auto-scripts
+if ! grep -q "auto-scripts" "${HOME_PATH}/Config.in"; then
+  echo 'source "package/auto-scripts/Config.in"' >> ${HOME_PATH}/Config.in
+fi
 
-sed -i "s/SOURCE/${SOURCE}/g" "${DEFAULT_PATH}"
+sed -i "s/\bSOURCE\b/${SOURCE}/g" "${DEFAULT_PATH}"
 sed -i "s/LUCI_EDITION/${LUCI_EDITION}/g" "${DEFAULT_PATH}"
 sed -i 's/root:.*/root:\$5\$XX5H9cuFUqmZU9Vj\$QpkbWUNMZue5VWPek0t0nP3iLSyXXlH7C\/qEBtZFaV9:20156:0:99999:7:::/g' ${FILES_PATH}/etc/shadow
 grep -q "admin:" ${FILES_PATH}/etc/shadow && sed -i 's/admin:.*/admin::0:0:99999:7:::/g' ${FILES_PATH}/etc/shadow
@@ -320,20 +317,16 @@ gitsvn https://github.com/sbwml/feeds_packages_lang_node-prebuilt ${HOME_PATH}/f
 if [[ -d "${HOME_PATH}/feeds/danshui/relevance/nas-packages/network/services" ]] && [[ ! -d "${HOME_PATH}//package/network/services/ddnsto" ]]; then
   mv ${HOME_PATH}/feeds/danshui/relevance/nas-packages/network/services/* ${HOME_PATH}/package/network/services
 fi
-if [[ -d "${HOME_PATH}/feeds/danshui/relevance/nas-packages/network/services" ]] && [[ ! -d "${HOME_PATH}/feeds/packages/multimedia/ffmpeg-remux" ]]; then
+if [[ -d "${HOME_PATH}/feeds/danshui/relevance/nas-packages/multimedia/ffmpeg-remux" ]] && [[ ! -d "${HOME_PATH}/feeds/packages/multimedia/ffmpeg-remux" ]]; then
   mv ${HOME_PATH}/feeds/danshui/relevance/nas-packages/multimedia/ffmpeg-remux ${HOME_PATH}/feeds/packages/multimedia/ffmpeg-remux
-fi
-
-# 降低v2raya的版本
-if [[ "${REPO_BRANCH}" == *"18.06"* ]] || [[ "${REPO_BRANCH}" == *"19.07"* ]] || [[ "${REPO_BRANCH}" == *"21.02"* ]]; then
-  #gitsvn https://github.com/281677160/common/tree/main/Share/v2raya ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/v2raya
-  source ${HOME_PATH}/build/common/Share/19.07/netsupport.sh
 fi
 
 # 降低luci-app-ssr-plus的shadowsocks-rust版本
 if [[ "${REPO_BRANCH}" == *"18.06"* ]] || [[ "${REPO_BRANCH}" == *"19.07"* ]] || [[ "${REPO_BRANCH}" == *"21.02"* ]] || [[ "${REPO_BRANCH}" == *"22.03"* ]]; then
+   source ${HOME_PATH}/build/common/Share/19.07/netsupport.sh
    gitsvn https://github.com/281677160/common/blob/main/Share/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/shadowsocks-rust/Makefile
    gitsvn https://github.com/281677160/common/blob/main/Share/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/relevance/passwall-packages/shadowsocks-rust/Makefile
+   rm -rf ${HOME_PATH}/feeds/danshui/luci-app-fancontrol
 fi
 
 if [[ ! -d "${HOME_PATH}/package/network/config/firewall4" ]]; then
@@ -350,13 +343,14 @@ if [[ ! -d "${HOME_PATH}/feeds/packages/devel/packr" ]]; then
 fi
 
 
-# N1类型固件修改增加固件名
+# N1类型固件修改
 if [[ -d "${HOME_PATH}/target/linux/armsr" ]]; then
   features_file="${HOME_PATH}/target/linux/armsr/Makefile"
+  sed -i "s?FEATURES+=.*?FEATURES+=targz?g" "${features_file}"
 elif [[ -d "${HOME_PATH}/target/linux/armvirt" ]]; then
   features_file="${HOME_PATH}/target/linux/armvirt/Makefile"
+  sed -i "s?FEATURES+=.*?FEATURES+=targz?g" "${features_file}"
 fi
-[[ -n "${features_file}" ]] && sed -i "s?FEATURES+=.*?FEATURES+=targz?g" "${features_file}"
 
 # 给固件保留配置更新固件的保留项目
 cat >> "${KEEPD_PATH}" <<-EOF
@@ -407,8 +401,8 @@ elif [[ -z "$(find "$A_PATH" -type d -name "default-settings" -print)" ]] && [[ 
   fi
 fi
 
+# zzz-default-settings文件
 ZZZ_PATH="$(find "$A_PATH" -name "*-default-settings" -not -path "A/exclude_dir/*" -print)"
-
 if [[ -n "${ZZZ_PATH}" ]]; then  
   echo "ZZZ_PATH=${ZZZ_PATH}" >> ${GITHUB_ENV}
   if [[ -f "${HOME_PATH}/LICENSES/doc/default-settings" ]]; then
@@ -416,7 +410,6 @@ if [[ -n "${ZZZ_PATH}" ]]; then
   else
     cp -Rf "${ZZZ_PATH}" ${HOME_PATH}/LICENSES/doc/default-settings
   fi
-  
   sed -i '/exit 0$/d' "${ZZZ_PATH}"
   sed -i "s?main.lang=.*?main.lang='zh_cn'?g" "${ZZZ_PATH}"
   grep -q "openwrt_banner" "${ZZZ_PATH}" && sed -i '/openwrt_banner/d' "${ZZZ_PATH}"
@@ -467,20 +460,29 @@ TIME r ""
 
 function Diy_COOLSNOWWOLF() {
 cd ${HOME_PATH}
+if [[ -d "${HOME_PATH}/feeds/danshui/luci-app-qmodem/driver" ]]; then
+  rm -rf ${HOME_PATH}/package/wwan/driver
+fi
 }
 
 
 function Diy_LIENOL() {
 cd ${HOME_PATH}
-
-if [[ "${REPO_BRANCH}" == *"19.07"* ]]; then
-  gitsvn https://github.com/281677160/common/tree/main/Share/libcap ${HOME_PATH}/feeds/packages/libs/libcap
+gitsvn https://github.com/openwrt/packages/tree/master/net/tailscale ${HOME_PATH}/feeds/packages/net/tailscale
+if [[ -d "${HOME_PATH}/feeds/other/lean" ]]; then
+  gitsvn https://github.com/coolsnowwolf/lede/tree/master/package/lean/mt ${HOME_PATH}/feeds/other/lean/mt
+  gitsvn https://github.com/coolsnowwolf/luci/tree/openwrt-23.05/applications/luci-app-vlmcsd ${HOME_PATH}/feeds/other/lean/luci-app-vlmcsd
+  gitsvn https://github.com/coolsnowwolf/packages/tree/master/net/vlmcsd ${HOME_PATH}/feeds/other/lean/vlmcsd
 fi
-if [[ "${REPO_BRANCH}" == *"22.03"* ]]; then
-  gitsvn https://github.com/coolsnowwolf/packages/tree/master/libs/pcre2 ${HOME_PATH}/feeds/packages/libs/pcre2
-  gitsvn https://github.com/coolsnowwolf/packages/tree/master/libs/glib2 ${HOME_PATH}/feeds/packages/libs/glib2
+if [[ "${REPO_BRANCH}" == *"23.05"* ]]; then
+   gitsvn https://github.com/openwrt/packages/tree/openwrt-23.05/lang/rust ${HOME_PATH}/feeds/packages/lang/rust
 fi
-
+if [[ "${REPO_BRANCH}" == *"24.10"* ]]; then
+  gitsvn https://github.com/coolsnowwolf/lede/tree/master/package/libs/mbedtls ${HOME_PATH}/package/libs/mbedtls
+  gitsvn https://github.com/coolsnowwolf/lede/tree/master/package/libs/ustream-ssl ${HOME_PATH}/package/libs/ustream-ssl
+  gitsvn https://github.com/coolsnowwolf/lede/tree/master/package/libs/uclient ${HOME_PATH}/package/libs/uclient
+  rm -fr ${HOME_PATH}/feeds/packages/utils/owut
+fi
 [[ -d "${HOME_PATH}/build/common/Share/luci-app-samba4" ]] && rm -rf ${HOME_PATH}/build/common/Share/luci-app-samba4
 amba4="$(find . -type d -name 'luci-app-samba4')"
 autosam="$(find . -type d -name 'autosamba')"
@@ -500,6 +502,8 @@ function Diy_IMMORTALWRT() {
 cd ${HOME_PATH}
 if [[ "${REPO_BRANCH}" =~ (openwrt-18.06|openwrt-18.06-k5.4) ]]; then
   gitsvn https://github.com/openwrt/routing/tree/openwrt-21.02/bmx6 ${HOME_PATH}/feeds/routing/bmx6
+  rm -rf ${HOME_PATH}/feeds/danshui/luci-app-nikki
+  rm -rf ${HOME_PATH}/feeds/danshui/luci-app-homeproxy
 fi
 }
 
@@ -511,17 +515,18 @@ cd ${HOME_PATH}
 
 function Diy_OFFICIAL() {
 cd ${HOME_PATH}
-if [[ "${REPO_BRANCH}" == *"22.03"* ]]; then
-  gitsvn https://github.com/coolsnowwolf/packages/tree/master/libs/pcre2 ${HOME_PATH}/feeds/packages/libs/pcre2
-  gitsvn https://github.com/coolsnowwolf/packages/tree/master/libs/glib2 ${HOME_PATH}/feeds/packages/libs/glib2
-fi
-if [[ "${REPO_BRANCH}" == *"19.07"* ]]; then
-  gitsvn https://github.com/281677160/common/tree/main/Share/libcap ${HOME_PATH}/feeds/packages/libs/libcap
+if [[ "${REPO_BRANCH}" == "openwrt-19.07" ]]; then
   gitsvn https://github.com/openwrt/openwrt/tree/openwrt-22.03/package/utils/bcm27xx-userland ${HOME_PATH}/package/utils/bcm27xx-userland
+  rm -fr ${HOME_PATH}/feeds/danshui/luci-app-kodexplorer
 fi
-if [[ "${REPO_BRANCH}" == *"main"* ]] || [[ "${REPO_BRANCH}" == *"master"* ]] || [[ "${REPO_BRANCH}" == *"24.10"* ]]; then
-  giturl https://github.com/281677160/common/blob/main/Share/luci-app-nginx-pingos/Makefile ${HOME_PATH}/feeds/danshui/luci-app-nginx-pingos/Makefile
+if [[ "${REPO_BRANCH}" =~ (main|master|openwrt-24.10) ]]; then
+  gitsvn https://github.com/281677160/common/blob/main/Share/luci-app-nginx-pingos/Makefile ${HOME_PATH}/feeds/danshui/luci-app-nginx-pingos/Makefile
 fi
+}
+
+
+function Diy_PADAVANONLY() {
+cd ${HOME_PATH}
 }
 
 
@@ -550,6 +555,7 @@ fi
 # 使用自定义配置文件
 [[ -f ${BUILD_PATH}/$CONFIG_FILE ]] && mv ${BUILD_PATH}/$CONFIG_FILE .config
 }
+
 
 function Diy_Publicarea() {
 cd ${HOME_PATH}
@@ -879,8 +885,6 @@ echo '
 # CONFIG_PACKAGE_ipv6helper is not set
 # CONFIG_PACKAGE_ip6tables is not set
 # CONFIG_PACKAGE_dnsmasq_full_dhcpv6 is not set
-# CONFIG_PACKAGE_odhcp6c is not set
-# CONFIG_PACKAGE_odhcpd-ipv6only is not set
 # CONFIG_IPV6 is not set
 # CONFIG_PACKAGE_6rd is not set
 # CONFIG_PACKAGE_6to4 is not set
@@ -911,8 +915,7 @@ CONFIG_PACKAGE_kmod-fs-vfat=y
 CONFIG_PACKAGE_kmod-fuse=y
 # CONFIG_PACKAGE_kmod-fs-ntfs is not set
 ' >> ${HOME_PATH}/.config
-mkdir -p ${HOME_PATH}/files/etc/hotplug.d/block
-cp -Rf ${HOME_PATH}/build/common/custom/10-mount ${HOME_PATH}/files/etc/hotplug.d/block/10-mount
+gitsvn https://github.com/281677160/common/blob/main/Share/block/10-mount ${HOME_PATH}/files/etc/hotplug.d/block/10-mount
 fi
 
 if [[ "${Disable_autosamba}" == "1" ]]; then
@@ -1154,6 +1157,14 @@ fi
 if [[ `grep -c "CONFIG_PACKAGE_odhcp6c=y" ${HOME_PATH}/.config` -eq '1' ]]; then
   sed -i '/CONFIG_PACKAGE_odhcpd=y/d' "${HOME_PATH}/.config"
   sed -i '/CONFIG_PACKAGE_odhcpd_full_ext_cer_id=0/d' "${HOME_PATH}/.config"
+fi
+
+if [[ `grep -c "CONFIG_PACKAGE_odhcp6c is not set" ${HOME_PATH}/.config` -eq '1' ]]; then
+  sed -i '/CONFIG_PACKAGE_odhcp6c is not set/d' "${HOME_PATH}/.config"
+fi
+
+if [[ `grep -c "CONFIG_PACKAGE_odhcpd-ipv6only is not set" ${HOME_PATH}/.config` -eq '1' ]]; then
+  sed -i '/CONFIG_PACKAGE_odhcpd-ipv6only is not set/d' "${HOME_PATH}/.config"
 fi
 
 if [[ "${AdGuardHome_Core}" == "1" ]]; then
@@ -1406,6 +1417,7 @@ if [[ "${UPDATE_FIRMWARE_ONLINE}" == "true" ]]; then
 fi
 }
 
+
 function openwrt_armvirt() {
 cd ${GITHUB_WORKSPACE}
 export FOLDER_NAME2="${GITHUB_WORKSPACE}/REPOSITORY"
@@ -1608,9 +1620,9 @@ cd ${GITHUB_WORKSPACE}
 start_path="${GITHUB_WORKSPACE}/build/${FOLDER_NAME}/relevance/settings.ini"
 chmod -R +x ${start_path} && source ${start_path}
 if [[ "${CPU_SELECTION}" =~ (E5|false) ]]; then
-  kaisbianyixx="弃用E5-编译"
+  kaisbianyixx="编译"
 else
-  kaisbianyixx="使用${CPU_SELECTION}-编译"
+  kaisbianyixx="${CPU_SELECTION}-编译"
 fi
 git clone https://user:${REPO_TOKEN}@github.com/${GIT_REPOSITORY}.git UPLOAD
 mkdir -p "UPLOAD/build/${FOLDER_NAME}/relevance"
