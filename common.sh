@@ -309,6 +309,10 @@ echo "src-git danshui https://github.com/281677160/openwrt-package.git;$SOURCE" 
    find . -type d -name "${x}" |grep -v 'danshui\|freifunk' |xargs -i rm -rf {}; \
  done
 
+if [[ ! "${REPO_BRANCH}" =~ ^(main|master|2410|(openwrt-)?(24\.10))$ ]]; then
+  rm -rf ${HOME_PATH}/feeds/danshui/luci-app-fancontrol
+fi
+
 # 更新golang和node版本
 gitsvn https://github.com/sbwml/packages_lang_golang ${HOME_PATH}/feeds/packages/lang/golang
 gitsvn https://github.com/sbwml/feeds_packages_lang_node-prebuilt ${HOME_PATH}/feeds/packages/lang/node
@@ -321,12 +325,13 @@ if [[ -d "${HOME_PATH}/feeds/danshui/relevance/nas-packages/multimedia/ffmpeg-re
   mv ${HOME_PATH}/feeds/danshui/relevance/nas-packages/multimedia/ffmpeg-remux ${HOME_PATH}/feeds/packages/multimedia/ffmpeg-remux
 fi
 
+# tproxy补丁
+source ${HOME_PATH}/build/common/Share/tproxy/netsupport.sh
+
 # 降低luci-app-ssr-plus的shadowsocks-rust版本
 if [[ "${REPO_BRANCH}" == *"18.06"* ]] || [[ "${REPO_BRANCH}" == *"19.07"* ]] || [[ "${REPO_BRANCH}" == *"21.02"* ]] || [[ "${REPO_BRANCH}" == *"22.03"* ]]; then
-   source ${HOME_PATH}/build/common/Share/19.07/netsupport.sh
    gitsvn https://github.com/281677160/common/blob/main/Share/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/shadowsocks-rust/Makefile
    gitsvn https://github.com/281677160/common/blob/main/Share/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/relevance/passwall-packages/shadowsocks-rust/Makefile
-   rm -rf ${HOME_PATH}/feeds/danshui/luci-app-fancontrol
 fi
 
 if [[ ! -d "${HOME_PATH}/package/network/config/firewall4" ]]; then
@@ -463,8 +468,10 @@ cd ${HOME_PATH}
 if [[ -d "${HOME_PATH}/feeds/danshui/luci-app-qmodem/driver" ]]; then
   rm -rf ${HOME_PATH}/package/wwan/driver
 fi
-   gitsvn https://github.com/fw876/helloworld/blob/d6bc31754ac228422ee6f03a692568f7dcdd08c3/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/shadowsocks-rust/Makefile
-   gitsvn https://github.com/fw876/helloworld/blob/d6bc31754ac228422ee6f03a692568f7dcdd08c3/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/relevance/passwall-packages/shadowsocks-rust/Makefile
+
+# luci-app-ssr-plus的shadowsocks-rust版本（1.23.0）编译错误，拉取1.22.0使用
+gitsvn https://github.com/fw876/helloworld/blob/d6bc31754ac228422ee6f03a692568f7dcdd08c3/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/shadowsocks-rust/Makefile
+gitsvn https://github.com/fw876/helloworld/blob/d6bc31754ac228422ee6f03a692568f7dcdd08c3/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/relevance/passwall-packages/shadowsocks-rust/Makefile
 }
 
 
@@ -477,11 +484,13 @@ if [[ -d "${HOME_PATH}/feeds/other/lean" ]]; then
   gitsvn https://github.com/coolsnowwolf/packages/tree/master/net/vlmcsd ${HOME_PATH}/feeds/other/lean/vlmcsd
 fi
 if [[ "${REPO_BRANCH}" == *"23.05"* ]]; then
+   # luci-app-ssr-plus的shadowsocks-rust版本（1.23.0）编译错误，拉取1.22.0使用
    gitsvn https://github.com/fw876/helloworld/blob/d6bc31754ac228422ee6f03a692568f7dcdd08c3/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/shadowsocks-rust/Makefile
    gitsvn https://github.com/fw876/helloworld/blob/d6bc31754ac228422ee6f03a692568f7dcdd08c3/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/relevance/passwall-packages/shadowsocks-rust/Makefile
    gitsvn https://github.com/openwrt/packages/tree/openwrt-23.05/lang/rust ${HOME_PATH}/feeds/packages/lang/rust
 fi
 if [[ "${REPO_BRANCH}" == *"24.10"* ]]; then
+  # luci-app-ssr-plus的shadowsocks-rust版本（1.23.0）编译错误，拉取1.22.0使用
   gitsvn https://github.com/fw876/helloworld/blob/d6bc31754ac228422ee6f03a692568f7dcdd08c3/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/shadowsocks-rust/Makefile
   gitsvn https://github.com/fw876/helloworld/blob/d6bc31754ac228422ee6f03a692568f7dcdd08c3/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/relevance/passwall-packages/shadowsocks-rust/Makefile
   gitsvn https://github.com/coolsnowwolf/lede/tree/master/package/libs/mbedtls ${HOME_PATH}/package/libs/mbedtls
@@ -526,6 +535,7 @@ if [[ "${REPO_BRANCH}" == "openwrt-19.07" ]]; then
   rm -fr ${HOME_PATH}/feeds/danshui/luci-app-kodexplorer
 fi
 if [[ "${REPO_BRANCH}" == *"23.05"* ]]; then
+   # luci-app-ssr-plus的shadowsocks-rust版本（1.23.0）编译错误，拉取1.22.0使用
    gitsvn https://github.com/fw876/helloworld/blob/d6bc31754ac228422ee6f03a692568f7dcdd08c3/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/luci-app-ssr-plus/shadowsocks-rust/Makefile
    gitsvn https://github.com/fw876/helloworld/blob/d6bc31754ac228422ee6f03a692568f7dcdd08c3/shadowsocks-rust/Makefile ${HOME_PATH}/feeds/danshui/relevance/passwall-packages/shadowsocks-rust/Makefile
 fi
@@ -891,7 +901,7 @@ CONFIG_PACKAGE_6to4=y
 fi
 
 if [[ "${Enable_IPV4_function}" == "1" ]] && \
-[[ "${REPO_BRANCH}" == *"main"* ]] || [[ "${REPO_BRANCH}" == *"master"* ]] || [[ "${REPO_BRANCH}" == *"23.05"* ]] || [[ "${REPO_BRANCH}" == *"24.10"* ]]; then
+[[ "${REPO_BRANCH}" =~ ^(main|master|2410|(openwrt-)?(19\.07|23\.05|24\.10))$ ]]; then
 echo '
 # CONFIG_PACKAGE_ipv6helper is not set
 # CONFIG_PACKAGE_ip6tables is not set
@@ -904,11 +914,9 @@ echo '
 ' >> ${HOME_PATH}/.config
 else
 echo '
-CONFIG_PACKAGE_ipv6helper=y
-CONFIG_PACKAGE_ip6tables=y
+CONFIG_IPV6=y
 CONFIG_PACKAGE_odhcp6c=y
 CONFIG_PACKAGE_odhcpd-ipv6only=y
-CONFIG_IPV6=y
 ' >> ${HOME_PATH}/.config
 fi
 
@@ -1175,19 +1183,6 @@ if [[ `grep -c "CONFIG_TARGET_mxs=y" ${HOME_PATH}/.config` -eq '1' ]] || [[ `gre
   fi
 fi
 
-if [[ `grep -c "CONFIG_PACKAGE_odhcp6c=y" ${HOME_PATH}/.config` -eq '1' ]]; then
-  sed -i '/CONFIG_PACKAGE_odhcpd=y/d' "${HOME_PATH}/.config"
-  sed -i '/CONFIG_PACKAGE_odhcpd_full_ext_cer_id=0/d' "${HOME_PATH}/.config"
-fi
-
-if [[ `grep -c "CONFIG_PACKAGE_odhcp6c is not set" ${HOME_PATH}/.config` -eq '1' ]]; then
-  sed -i '/CONFIG_PACKAGE_odhcp6c is not set/d' "${HOME_PATH}/.config"
-fi
-
-if [[ `grep -c "CONFIG_PACKAGE_odhcpd-ipv6only is not set" ${HOME_PATH}/.config` -eq '1' ]]; then
-  sed -i '/CONFIG_PACKAGE_odhcpd-ipv6only is not set/d' "${HOME_PATH}/.config"
-fi
-
 if [[ "${AdGuardHome_Core}" == "1" ]]; then
   echo -e "\nCONFIG_PACKAGE_luci-app-adguardhome=y" >> ${HOME_PATH}/.config
 fi
@@ -1195,6 +1190,10 @@ fi
 if ! grep -q "auto-scripts=y" ${HOME_PATH}/.config; then
   echo -e "\nCONFIG_PACKAGE_auto-scripts=y" >> ${HOME_PATH}/.config
 fi
+
+#if [[ "${REPO_BRANCH}" == *"22.03"* ]]; then
+#  sed -i '/ipv6helper=y/d' "${HOME_PATH}/.config"
+#fi
 
 if [[ `grep -c "CONFIG_PACKAGE_dnsmasq_full_nftset=y" ${HOME_PATH}/.config` -eq '1' ]]; then
   if [[ `grep -c "CONFIG_PACKAGE_luci-app-passwall2_Nftables_Transparent_Proxy=y" ${HOME_PATH}/.config` -eq '1' ]]; then

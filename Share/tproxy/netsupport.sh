@@ -58,8 +58,8 @@ if [[ `grep -c "kmod-netlink-diag" $iproutemk` -eq '0' ]] && \
 fi
 
 if [[ "${REPO_BRANCH}" == *"19.07"* ]]; then
-  curl -fsSL https://raw.githubusercontent.com/281677160/common/main/Share/19.07/19.07/include/netfilter.mk -o ${HOME_PATH}/include/netfilter.mk
-  curl -fsSL https://raw.githubusercontent.com/281677160/common/main/Share/19.07/19.07/package/kernel/linux/modules/netfilter.mk -o ${HOME_PATH}/package/kernel/linux/modules/netfilter.mk
+  curl -fsSL https://raw.githubusercontent.com/281677160/common/main/Share/tproxy/19.07/include/netfilter.mk -o ${HOME_PATH}/include/netfilter.mk
+  curl -fsSL https://raw.githubusercontent.com/281677160/common/main/Share/tproxy/19.07/package/kernel/linux/modules/netfilter.mk -o ${HOME_PATH}/package/kernel/linux/modules/netfilter.mk
 fi
 
 if [[ "${REPO_BRANCH}" == *"21.02"* ]]; then
@@ -67,21 +67,37 @@ if [[ "${REPO_BRANCH}" == *"21.02"* ]]; then
   curl -fsSL https://raw.githubusercontent.com/Lienol/openwrt/d9d9e37e348f2753ff2c6c3958d46dfc573f20de/include/netfilter.mk -o ${HOME_PATH}/include/netfilter.mk
 fi
 
+if [[ "${REPO_BRANCH}" == "openwrt-18.06-k5.4" ]]; then
+  curl -fsSL https://raw.githubusercontent.com/281677160/common/main/Share/tproxy/openwrt-18.06-k5.4/package/kernel/linux/modules/netfilter.mk -o ${HOME_PATH}/package/kernel/linux/modules/netfilter.mk
+  curl -fsSL https://raw.githubusercontent.com/281677160/common/main/Share/tproxy/openwrt-18.06-k5.4/include/netfilter.mk -o ${HOME_PATH}/include/netfilter.mk
+fi
+
+if [[ "${REPO_BRANCH}" == "openwrt-18.06" ]]; then
+  curl -fsSL https://raw.githubusercontent.com/281677160/common/main/Share/tproxy/openwrt-18.06/package/kernel/linux/modules/netfilter.mk -o ${HOME_PATH}/package/kernel/linux/modules/netfilter.mk
+  curl -fsSL https://raw.githubusercontent.com/281677160/common/main/Share/tproxy/openwrt-18.06/include/netfilter.mk -o ${HOME_PATH}/include/netfilter.mk
+fi
+
 # 19.07补丁
 if [[ "${REPO_BRANCH}" == *"19.07"* ]]; then
-  gitsvn https://github.com/openwrt/packages/tree/openwrt-21.02/libs/libcap ${HOME_PATH}/feeds/packages/libs/libcap
-  gitsvn https://github.com/coolsnowwolf/packages/tree/master/net/kcptun ${HOME_PATH}/feeds/packages/net/kcptun
-  gitsvn https://github.com/openwrt/openwrt/tree/openwrt-23.05/tools/cmake ${HOME_PATH}/tools/cmake
-  gitsvn https://github.com/openwrt/packages/tree/openwrt-23.05/lang/ruby ${HOME_PATH}/feeds/packages/lang/ruby
-  gitsvn https://github.com/openwrt/packages/tree/openwrt-23.05/libs/yaml ${HOME_PATH}/feeds/packages/libs/yaml
+  gitsvn https://github.com/openwrt/packages/tree/2db418f6707af1a938d6c033aa81946334c1a8bb/libs/libcap ${HOME_PATH}/feeds/packages/libs/libcap
+  gitsvn https://github.com/coolsnowwolf/packages/tree/152022403f0ab2a85063ae1cd9687bd5240fe9b7/net/kcptun ${HOME_PATH}/feeds/packages/net/kcptun
+  if [[ "${SOURCE_CODE}" == "OFFICIAL" ]]; then
+    gitsvn https://github.com/openwrt/openwrt/tree/202d404f743a49a50e253c54f43ebd47fd028496/tools/cmake ${HOME_PATH}/tools/cmake
+  else
+    gitsvn https://github.com/openwrt/openwrt/tree/45082d4e51935bb3e8eab255dd69c87f6f9310b0/tools/cmake ${HOME_PATH}/tools/cmake
+  fi
+  gitsvn https://github.com/openwrt/packages/tree/47ea48c09d61610e2d599b94f66f90e21164db1c/lang/ruby ${HOME_PATH}/feeds/packages/lang/ruby
+  gitsvn https://github.com/openwrt/packages/tree/47ea48c09d61610e2d599b94f66f90e21164db1c/libs/yaml ${HOME_PATH}/feeds/packages/libs/yaml
 fi
 
 if [[ "${REPO_BRANCH}" == *"22.03"* ]]; then
-  gitsvn https://github.com/coolsnowwolf/packages/tree/master/libs/pcre2 ${HOME_PATH}/feeds/packages/libs/pcre2
-  gitsvn https://github.com/coolsnowwolf/packages/tree/master/libs/glib2 ${HOME_PATH}/feeds/packages/libs/glib2
-  gitsvn https://github.com/coolsnowwolf/packages/tree/master/net/openssh ${HOME_PATH}/feeds/packages/net/openssh
-  gitsvn https://github.com/coolsnowwolf/lede/tree/master/toolchain/gcc ${HOME_PATH}/toolchain/gcc
-  gitsvn https://github.com/coolsnowwolf/packages/tree/master/libs/libwebsockets ${HOME_PATH}/feeds/packages/libs/libwebsockets
+  gitsvn https://github.com/coolsnowwolf/packages/tree/152022403f0ab2a85063ae1cd9687bd5240fe9b7/libs/pcre2 ${HOME_PATH}/feeds/packages/libs/pcre2
+  gitsvn https://github.com/coolsnowwolf/packages/tree/152022403f0ab2a85063ae1cd9687bd5240fe9b7/libs/glib2 ${HOME_PATH}/feeds/packages/libs/glib2
+  gitsvn https://github.com/coolsnowwolf/packages/tree/152022403f0ab2a85063ae1cd9687bd5240fe9b7/net/openssh ${HOME_PATH}/feeds/packages/net/openssh
+  gitsvn https://github.com/coolsnowwolf/lede/tree/326599e3d08d7fe1dc084e1c87581cdf5a8e41a6/toolchain/gcc ${HOME_PATH}/toolchain/gcc
+  gitsvn https://github.com/coolsnowwolf/packages/tree/152022403f0ab2a85063ae1cd9687bd5240fe9b7/libs/libwebsockets ${HOME_PATH}/feeds/packages/libs/libwebsockets
+  curl -fsSL https://raw.githubusercontent.com/Lienol/openwrt/d9d9e37e348f2753ff2c6c3958d46dfc573f20de/package/kernel/linux/modules/netfilter.mk -o ${HOME_PATH}/package/kernel/linux/modules/netfilter.mk
+  curl -fsSL https://raw.githubusercontent.com/Lienol/openwrt/d9d9e37e348f2753ff2c6c3958d46dfc573f20de/include/netfilter.mk -o ${HOME_PATH}/include/netfilter.mk
   rm -fr ${HOME_PATH}/feeds/luci/applications/luci-app-ntpc
 fi
 
