@@ -102,7 +102,6 @@ if [[ "${REPO_BRANCH}" == *"22.03"* ]]; then
 fi
 
 
-
 function gitsvn() {
 cd "${HOME_PATH}"
 local A="${1%.git}"
