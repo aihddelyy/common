@@ -3,7 +3,7 @@
 # common Module by 28677160
 # matrix.target=${FOLDER_NAME}
 
-ACTIONS_VERSION="1.0.8"
+ACTIONS_VERSION="1.0.9"
 Compte=$(date +%Y年%m月%d号%H时%M分)
 function TIME() {
     case $1 in
@@ -162,20 +162,33 @@ OFFICIAL)
   export FEEDS_CONF="$RAW_WEB/feeds.conf.default"
   export BASE_FILES="$RAW_WEB/package/base-files/files/bin/config_generate"
 ;;
-PADAVANONLY)
-  export REPO_URL="https://github.com/padavanonly/immortalwrt-mt798x-24.10"
-  export SOURCE="Mt798x"
-  export SOURCE_OWNER="PADAVANONLY's"
-  if [[ "${REPO_BRANCH}" == "2410" ]]; then
-      export LUCI_EDITION="24.10"
+MT798X)
+  if [[ "${REPO_BRANCH}" == "hanwckf-21.02" ]]; then
+    export REPO_URL="https://github.com/hanwckf/immortalwrt-mt798x"
+    export SOURCE="Mt798x"
+    export SOURCE_OWNER="hanwckf's"
+    export REPO_BRANCH="openwrt-21.02"
+    export LUCI_EDITION="$(echo "${REPO_BRANCH}" |sed 's/openwrt-//g')"
+    export DIY_WORK="hanwckf2102"
+    export CON_TENTCOM="$(echo "${REPO_URL}" |cut -d"/" -f4-5)"
+    export RAW_WEB="https://raw.githubusercontent.com/${CON_TENTCOM}/${REPO_BRANCH}"
+    export FEEDS_CONF="$RAW_WEB/feeds.conf.default"
+    export BASE_FILES="$RAW_WEB/package/base-files/files/bin/config_generate"
   else
+    export REPO_URL="https://github.com/padavanonly/immortalwrt-mt798x-24.10"
+    export SOURCE="Mt798x"
+    export SOURCE_OWNER="PADAVANONLY's"
+    if [[ "${REPO_BRANCH}" == "2410" ]]; then
+      export LUCI_EDITION="24.10"
+    else
       export LUCI_EDITION="$(echo "${REPO_BRANCH}" |sed 's/openwrt-//g')"
+    fi
+    export DIY_WORK="${FOLDER_NAME}$(echo "${LUCI_EDITION}" |sed "s/\.//g" |sed "s/\-//g")"
+    export CON_TENTCOM="$(echo "${REPO_URL}" |cut -d"/" -f4-5)"
+    export RAW_WEB="https://raw.githubusercontent.com/${CON_TENTCOM}/${REPO_BRANCH}"
+    export FEEDS_CONF="$RAW_WEB/feeds.conf.default"
+    export BASE_FILES="$RAW_WEB/package/base-files/files/bin/config_generate"
   fi
-  export DIY_WORK="${FOLDER_NAME}$(echo "${LUCI_EDITION}" |sed "s/\.//g" |sed "s/\-//g")"
-  export CON_TENTCOM="$(echo "${REPO_URL}" |cut -d"/" -f4-5)"
-  export RAW_WEB="https://raw.githubusercontent.com/${CON_TENTCOM}/${REPO_BRANCH}"
-  export FEEDS_CONF="$RAW_WEB/feeds.conf.default"
-  export BASE_FILES="$RAW_WEB/package/base-files/files/bin/config_generate"
 ;;
 *)
   TIME r "不支持${SOURCE_CODE}此源码，当前只支持COOLSNOWWOLF、LIENOL、IMMORTALWRT、XWRT、OFFICIAL"
@@ -326,7 +339,7 @@ if [[ -d "${HOME_PATH}/feeds/danshui/relevance/nas-packages/multimedia/ffmpeg-re
 fi
 
 # tproxy补丁
-source ${HOME_PATH}/build/common/Share/tproxy/netsupport.sh
+source ${HOME_PATH}/build/common/Share/tproxy/nft_tproxy.sh
 
 # 降低luci-app-ssr-plus的shadowsocks-rust版本
 if [[ "${REPO_BRANCH}" == *"18.06"* ]] || [[ "${REPO_BRANCH}" == *"19.07"* ]] || [[ "${REPO_BRANCH}" == *"21.02"* ]] || [[ "${REPO_BRANCH}" == *"22.03"* ]]; then
@@ -545,7 +558,7 @@ fi
 }
 
 
-function Diy_PADAVANONLY() {
+function Diy_MT798X() {
 cd ${HOME_PATH}
 }
 
@@ -1191,9 +1204,11 @@ if ! grep -q "auto-scripts=y" ${HOME_PATH}/.config; then
   echo -e "\nCONFIG_PACKAGE_auto-scripts=y" >> ${HOME_PATH}/.config
 fi
 
-#if [[ "${REPO_BRANCH}" == *"22.03"* ]]; then
-#  sed -i '/ipv6helper=y/d' "${HOME_PATH}/.config"
-#fi
+if [[ `grep -c "CONFIG_PACKAGE_libopenssl-afalg_sync=y" ${HOME_PATH}/.config` -eq '1' ]]; then
+  if [[ `grep -c "CONFIG_PACKAGE_libopenssl-devcrypto=y" ${HOME_PATH}/.config` -eq '1' ]]; then
+    sed -i 's/CONFIG_PACKAGE_libopenssl-devcrypto=y/# CONFIG_PACKAGE_libopenssl-devcrypto is not set/g' ${HOME_PATH}/.config
+  fi
+fi
 
 if [[ `grep -c "CONFIG_PACKAGE_dnsmasq_full_nftset=y" ${HOME_PATH}/.config` -eq '1' ]]; then
   if [[ `grep -c "CONFIG_PACKAGE_luci-app-passwall2_Nftables_Transparent_Proxy=y" ${HOME_PATH}/.config` -eq '1' ]]; then
