@@ -5,8 +5,8 @@ touch /etc/crontabs/root
 
 ARCHIB="$(grep 'DISTRIB_ARCH' /etc/openwrt_release|cut -d= -f2|tr -d "'")"
 DISTRIBID="$(grep 'DISTRIB_ID' /etc/openwrt_release|cut -d= -f2|tr -d "'")"
-OPENWRT_RELEASE="$(grep 'OPENWRT_RELEASE' /usr/lib/os-release|cut -d= -f2|tr -d "'")"
-DISTRIB_DESCRIPTION="$(grep 'DISTRIB_DESCRIPTION' /etc/openwrt_release|cut -d= -f2|tr -d '"')"
+OPENWRT_RELEASE="$(grep 'OPENWRT_RELEASE' /usr/lib/os-release|cut -d= -f2|tr -d '"')"
+DISTRIB_DESCRIPTION="$(grep 'DISTRIB_DESCRIPTION' /etc/openwrt_release|cut -d= -f2|tr -d "'")"
 #grep -q "x86_64" /etc/banner && sed -i "s?x86_64?$ARCHIB?g" /etc/banner
 #[[ "${DISTRIBID}" == "ImmortalWrt" ]] && sed -i "s?DISTRIB_ID='ImmortalWrt'?DISTRIB_ID='OpenWrt'?g" /etc/openwrt_release
 [[ -f "/usr/lib/lua/luci/controller/ttyd.lua" ]] && sed -i 's?services?system?g' "/usr/lib/lua/luci/controller/ttyd.lua"
@@ -26,7 +26,7 @@ if [[ -f "/usr/lib/os-release" ]]; then
 fi
 
 if [[ -f "/etc/banner" ]]; then
-	sed -i "s/DISTRIB_DESCRIPTION/$DISTRIB_DESCRIPTION/g" /etc/banner
+	sed -i "s/DISTRIB_DESCRIPTION/$DISTRIB_DESCRIPTION Customized_Information/g" /etc/banner
 fi
 
 if [[ -f "/etc/openwrt_release" ]]; then
