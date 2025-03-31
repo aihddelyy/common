@@ -3,7 +3,7 @@
 # common Module by 28677160
 # matrix.target=${FOLDER_NAME}
 
-ACTIONS_VERSION="1.0.9"
+ACTIONS_VERSION="2.1.0"
 Compte=$(date +%Y年%m月%d号%H时%M分)
 function TIME() {
     case $1 in
@@ -34,7 +34,7 @@ if [[ -n "${INPUTS_REPO_BRANCH}" ]]; then
   SOURCE_CODE="${SOURCE_CODE}"
   REPO_BRANCH="${INPUTS_REPO_BRANCH}"
   CONFIG_FILE="$(echo "${INPUTS_CONFIG_FILE}" |cut -d"/" -f2)"
-  CPU_SELECTION="${INPUTS_CPU_SELECTION}"
+  RETAIN_MINUTE="${INPUTS_RETAIN_MINUTE}"
   INFORMATION_NOTICE="${INPUTS_INFORMATION_NOTICE}"
   UPLOAD_FIRMWARE="${INPUTS_UPLOAD_FIRMWARE}"
   UPLOAD_RELEASE="${INPUTS_UPLOAD_RELEASE}"
@@ -470,8 +470,6 @@ if [[ "${UPDATE_FIRMWARE_ONLINE}" == "true" ]]; then
 else
   TIME r "SSH连接固件输入命令'openwrt'可进行修改后台IP，清空密码和还原出厂设置操作"
 fi
-TIME r ""
-TIME g "CPU性能：8370C > 8272CL > 8171M > E5系列"
 TIME r ""
 }
 
