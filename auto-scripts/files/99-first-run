@@ -27,7 +27,7 @@ if [[ -f "/usr/lib/os-release" ]]; then
 fi
 
 if [[ -f "/etc/banner" ]]; then
-	sed -i "s/BANNER/$DISTRIB_DESCRIPTION Customized_Information/g" /etc/banner
+	sed -i "s/openwrt_banner/$DISTRIB_DESCRIPTION Customized_Information/g" /etc/banner
 fi
 
 if [[ -f "/etc/openwrt_release" ]]; then

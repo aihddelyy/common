@@ -329,11 +329,11 @@ fi
 if [[ -d "${HOME_PATH}/SRC_LUCI/modules/luci-mod-system" ]]; then
   THEME_BRANCH="Theme2"
   rm -rf ${HOME_PATH}/SRC_LUCI
-  gitsvn https://github.com/jerrykuku/luci-theme-argon.git ${HOME_PATH}/package/luci-theme-argon
+  gitsvn https://github.com/jerrykuku/luci-theme-argon.git ${HOME_PATH}/package/feees/dstheme/luci-theme-argon
 else
   THEME_BRANCH="Theme1"
   rm -rf ${HOME_PATH}/SRC_LUCI
-  gitsvn https://github.com/jerrykuku/luci-theme-argon/tree/18.06 ${HOME_PATH}/package/luci-theme-argon
+  gitsvn https://github.com/jerrykuku/luci-theme-argon/tree/18.06 ${HOME_PATH}/package/feees/dstheme/luci-theme-argon
 fi
 
 echo "src-git danshui https://github.com/281677160/openwrt-package.git;$SOURCE" >> ${HOME_PATH}/feeds.conf.default
@@ -412,11 +412,11 @@ if [[ ! "${REPO_BRANCH}" =~ ^(main|master|(openwrt-)?(24\.10))$ ]]; then
   rm -rf ${HOME_PATH}/feeds/danshui/luci-app-fancontrol
 fi
 
-if [[ "${REPO_BRANCH}" =~ ^(2410|(openwrt-)?(24\.10))$ ]]; then
-  rm -rf ${HOME_PATH}/feeds/danshui/luci-app-quickstart
-  rm -rf ${HOME_PATH}/feeds/danshui/luci-app-linkease
-  rm -rf ${HOME_PATH}/feeds/danshui/luci-app-istorex
-fi
+#if [[ "${REPO_BRANCH}" =~ ^(2410|(openwrt-)?(24\.10))$ ]]; then
+#  rm -rf ${HOME_PATH}/feeds/danshui/luci-app-quickstart
+#  rm -rf ${HOME_PATH}/feeds/danshui/luci-app-linkease
+#  rm -rf ${HOME_PATH}/feeds/danshui/luci-app-istorex
+#fi
 
 if [[ ! -d "${HOME_PATH}/package/network/config/firewall4" ]]; then
     rm -rf ${HOME_PATH}/feeds/danshui/luci-app-nikki
