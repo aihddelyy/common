@@ -335,13 +335,11 @@ fi
 if [[ -d "${HOME_PATH}/SRC_LUCI/modules/luci-mod-system" ]]; then
   THEME_BRANCH="Theme2"
   rm -rf ${HOME_PATH}/SRC_LUCI
-  mkdir -p ${HOME_PATH}/package/theme
-  gitsvn https://github.com/jerrykuku/luci-theme-argon.git ${HOME_PATH}/package/theme/luci-theme-argon
+  gitsvn https://github.com/jerrykuku/luci-theme-argon.git ${HOME_PATH}/package/themes/luci-theme-argon
 else
   THEME_BRANCH="Theme1"
   rm -rf ${HOME_PATH}/SRC_LUCI
-  mkdir -p ${HOME_PATH}/package/theme
-  gitsvn https://github.com/jerrykuku/luci-theme-argon/tree/18.06 ${HOME_PATH}/package/theme/luci-theme-argon
+  gitsvn https://github.com/jerrykuku/luci-theme-argon/tree/18.06 ${HOME_PATH}/package/themes/luci-theme-argon
 fi
 
 echo "src-git danshui https://github.com/281677160/openwrt-package.git;$SOURCE" >> ${HOME_PATH}/feeds.conf.default
@@ -413,7 +411,7 @@ luci-app-ssr-plus,luci-app-passwall,v2dat,v2ray-geodata, \
 luci-app-wechatpush,v2ray-core,v2ray-plugin,v2raya,xray-core,xray-plugin,luci-app-alist,alist"
 t=(${z//,/ })
 for x in ${t[@]}; do \
-  find . '(' -path './feeds/danshui' -o -path './feeds/dstheme' -o -path './feeds/OpenClash' -o -path './package/theme' ')' -prune -o -name "$x" -type d -exec rm -rf {} +
+  find . '(' -path './feeds/danshui' -o -path './feeds/dstheme' -o -path './feeds/OpenClash' -o -path './package/themes' ')' -prune -o -name "$x" -type d -exec rm -rf {} +
 done
 
 if [[ ! "${REPO_BRANCH}" =~ ^(main|master|(openwrt-)?(24\.10))$ ]]; then
