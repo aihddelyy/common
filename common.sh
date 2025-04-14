@@ -316,10 +316,16 @@ else
 fi
 if grep -q "src-git-full" "${HOME_PATH}/feeds.conf.default"; then
   SRC_LIANJIE="$(grep -E '^src-git-full luci https' "${HOME_PATH}/feeds.conf.default" | sed -E 's/src-git-full luci (https?:\/\/[^;]+).*/\1/')"
-  SRC_FENZHIHAO="$(grep -E '^src-git-full luci https' "${HOME_PATH}/feeds.conf.default" | sed -E 's/.*;(.+)/\1/')"
+  a=$(grep -E '^src-git-full luci https' "feeds.conf.default")
+  if [[ -n "$(echo "$a" |grep -E '\;')" ]]; then
+    SRC_FENZHIHAO="$(grep -E '^src-git-full luci https' "${HOME_PATH}/feeds.conf.default" | sed -E 's/.*;(.+)/\1/')"
+  fi
 else
  SRC_LIANJIE="$(grep -E '^src-git luci https' "${HOME_PATH}/feeds.conf.default" | sed -E 's/src-git luci (https?:\/\/[^;]+).*/\1/')"
- SRC_FENZHIHAO="$(grep -E '^src-git luci https' "${HOME_PATH}/feeds.conf.default" | sed -E 's/.*;(.+)/\1/')"
+  a=$(grep -E '^src-git luci https' "feeds.conf.default")
+  if [[ -n "$(echo "$a" |grep -E '\;')" ]]; then
+    SRC_FENZHIHAO="$(grep -E '^src-git luci https' "${HOME_PATH}/feeds.conf.default" | sed -E 's/.*;(.+)/\1/')"
+  fi
 fi
 if [[ -n "${SRC_FENZHIHAO}" ]]; then
   git clone -q --single-branch --depth=1 --branch=${SRC_FENZHIHAO} ${SRC_LIANJIE} ${HOME_PATH}/SRC_LUCI
@@ -407,7 +413,7 @@ luci-app-ssr-plus,luci-app-passwall,v2dat,v2ray-geodata, \
 luci-app-wechatpush,v2ray-core,v2ray-plugin,v2raya,xray-core,xray-plugin,luci-app-alist,alist"
 t=(${z//,/ })
 for x in ${t[@]}; do \
-  find . '(' -path './feeds/danshui' -o -path './feeds/dstheme' -o -path './feeds/OpenClash' -o -path './package/theme' -o -path './feeds/theme' ')' -prune -o -name "$x" -type d -exec rm -rf {} +
+  find . '(' -path './feeds/danshui' -o -path './feeds/dstheme' -o -path './feeds/OpenClash' -o -path './package/theme' ')' -prune -o -name "$x" -type d -exec rm -rf {} +
 done
 
 if [[ ! "${REPO_BRANCH}" =~ ^(main|master|(openwrt-)?(24\.10))$ ]]; then
