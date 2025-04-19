@@ -639,7 +639,7 @@ if [[ "${Enable_IPV6_function}" == "1" ]]; then
     uci set network.lan.ip6assign='64'
     uci commit network
     uci set dhcp.lan.ra='server'
-    uci set dhcp.lan.dhcpv6='server'
+    uci set dhcp.lan.dhcpv6='0'
     uci set dhcp.lan.ra_management='1'
     uci set dhcp.lan.ra_default='1'
     uci set dhcp.@dnsmasq[0].localservice=0
