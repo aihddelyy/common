@@ -64,6 +64,8 @@ if [[ "${git_laqu}" == "1" ]]; then
       git sparse-checkout init --cone > /dev/null 2>&1
       git sparse-checkout set "${path_part}" > /dev/null 2>&1
       git checkout "${branch_name}" > /dev/null 2>&1
+      grep -rl 'include ../../luci.mk' . | xargs -r sed -i 's#include ../../luci.mk#include \$(TOPDIR)/feeds/luci/luci.mk#g'
+      grep -rl 'include ../../lang/' . | xargs -r sed -i 's#include ../../lang/#include \$(TOPDIR)/feeds/packages/lang/#g'
       rm -fr "${content}"
       mv "${path_part}" "${content}"
       if [[ $? -ne 0 ]]; then
@@ -169,17 +171,11 @@ if [[ "${REPO_BRANCH}" == *"21.02"* ]]; then
 fi
 
 if [[ "${REPO_BRANCH}" == "openwrt-18.06-k5.4" ]]; then
-  gitcon https://github.com/coolsnowwolf/packages/tree/152022403f0ab2a85063ae1cd9687bd5240fe9b7/net/dnsproxy ${HOME_PATH}/feeds/packages/net/dnsproxy
-  gitcon https://github.com/coolsnowwolf/lede/tree/326599e3d08d7fe1dc084e1c87581cdf5a8e41a6/package/libs/libjson-c ${HOME_PATH}/package/libs/libjson-c
-  gitcon https://github.com/coolsnowwolf/lede/tree/326599e3d08d7fe1dc084e1c87581cdf5a8e41a6/toolchain/gcc ${HOME_PATH}/toolchain/gcc
   curl -fsSL https://raw.githubusercontent.com/281677160/common/main/Share/tproxy/openwrt-18.06-k5.4/package/kernel/linux/modules/netfilter.mk -o ${HOME_PATH}/package/kernel/linux/modules/netfilter.mk
   curl -fsSL https://raw.githubusercontent.com/281677160/common/main/Share/tproxy/openwrt-18.06-k5.4/include/netfilter.mk -o ${HOME_PATH}/include/netfilter.mk
 fi
 
 if [[ "${REPO_BRANCH}" == "openwrt-18.06" ]]; then
-  gitcon https://github.com/coolsnowwolf/packages/tree/152022403f0ab2a85063ae1cd9687bd5240fe9b7/net/dnsproxy ${HOME_PATH}/feeds/packages/net/dnsproxy
-  gitcon https://github.com/coolsnowwolf/lede/tree/326599e3d08d7fe1dc084e1c87581cdf5a8e41a6/package/libs/libjson-c ${HOME_PATH}/package/libs/libjson-c
-  gitcon https://github.com/coolsnowwolf/lede/tree/326599e3d08d7fe1dc084e1c87581cdf5a8e41a6/toolchain/gcc ${HOME_PATH}/toolchain/gcc
   curl -fsSL https://raw.githubusercontent.com/281677160/common/main/Share/tproxy/openwrt-18.06/package/kernel/linux/modules/netfilter.mk -o ${HOME_PATH}/package/kernel/linux/modules/netfilter.mk
   curl -fsSL https://raw.githubusercontent.com/281677160/common/main/Share/tproxy/openwrt-18.06/include/netfilter.mk -o ${HOME_PATH}/include/netfilter.mk
 fi

@@ -202,19 +202,17 @@ function install_dependencies() {
 	set -x
 
 	apt-get full-upgrade -y $BPO_FLAG
-	apt-get install -y $BPO_FLAG ack antlr3 asciidoc autoconf automake autopoint binutils bison \
-		build-essential bzip2 ccache cmake cpio curl device-tree-compiler ecj fakeroot \
-		fastjar flex gawk gettext genisoimage git gnutls-dev gperf haveged help2man \
-		intltool irqbalance jq libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev \
-		libltdl-dev libmpc-dev libmpfr-dev libncurses-dev libreadline-dev libssl-dev \
-		libtool libyaml-dev libz-dev lrzsz msmtp nano ninja-build p7zip p7zip-full patch \
-		pkgconf libpython3-dev python3 python3-pip python3-cryptography python3-docutils \
-		python3-ply python3-pyelftools python3-requests qemu-utils quilt re2c rsync scons \
-		sharutils squashfs-tools subversion swig texinfo uglifyjs unzip vim wget xmlto \
-		zlib1g-dev zstd xxd $VERSION_PACKAGE
+	apt-get install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
+		bzip2 ccache clang cmake cpio curl device-tree-compiler flex gawk gcc-multilib g++-multilib gettext \
+		genisoimage git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev \
+		libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev \
+		libreadline-dev libssl-dev libtool llvm lrzsz msmtp ninja-build p7zip p7zip-full patch pkgconf \
+		python3 python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion \
+		swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev $VERSION_PACKAGE
 
-	# N1打包需要的依赖
-	apt-get install -y rename pigz
+	# N1打包需要的和alist依赖
+	apt-get install -y rename pigz libfuse-dev
+        apt-get -y install $(curl -fsSL https://tinyurl.com/ubuntu2204-make-openwrt)
 
 	# fix broken http2 support for curl on buster
 	if [ "$VERSION_CODENAME" == "buster"]; then
@@ -261,8 +259,6 @@ function install_dependencies() {
 	fi
 
 	apt-get install gh -y
-
-	apt-get clean -y
 
 	if TMP_DIR="$(mktemp -d)"; then
 		pushd "$TMP_DIR"
@@ -312,7 +308,8 @@ function install_dependencies() {
 	rm -rf "$TMP_DIR"
 
 	set +x
- 
+ 	apt-get clean -y
+ 	apt-get -y autoremove --purge
  	go version
 	gcc --version
 	g++ --version
