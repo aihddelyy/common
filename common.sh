@@ -225,11 +225,11 @@ echo "DELETE=${GITHUB_WORKSPACE}/openwrt/package/base-files/files/etc/deletefile
 echo "DEFAULT_PATH=${GITHUB_WORKSPACE}/openwrt/package/auto-scripts/files/99-first-run" >> ${GITHUB_ENV}
 echo "KEEPD_PATH=${GITHUB_WORKSPACE}/openwrt/package/base-files/files/lib/upgrade/keep.d/base-files-essential" >> ${GITHUB_ENV}
 echo "CLEAR_PATH=${GITHUB_WORKSPACE}/openwrt/Clear" >> ${GITHUB_ENV}
-echo "Upgrade_Date=`date -d "$(date +'%Y-%m-%d %H:%M:%S')" +%s`" >> ${GITHUB_ENV}
+echo "UPGRADE_DATE=`date -d "$(date +'%Y-%m-%d %H:%M:%S')" +%s`" >> ${GITHUB_ENV}
 echo "Firmware_Date=$(date +%Y-%m%d-%H%M)" >> ${GITHUB_ENV}
 echo "Compte_Date=$(date +%Y年%m月%d号%H时%M分)" >> ${GITHUB_ENV}
 echo "Tongzhi_Date=$(date +%Y年%m月%d日)" >> ${GITHUB_ENV}
-echo "Gujian_Date=$(date +%m.%d)" >> ${GITHUB_ENV}
+echo "GUJIAN_DATE=$(date +%m.%d)" >> ${GITHUB_ENV}
 echo "FEEDS_CONF=${FEEDS_CONF}" >> ${GITHUB_ENV}
 echo "BASE_FILES=${BASE_FILES}" >> ${GITHUB_ENV}
 echo "UPGRADE_KEEP=$RAW_WEB/package/base-files/files/lib/upgrade/keep.d/base-files-essential" >> ${GITHUB_ENV}
@@ -1644,7 +1644,7 @@ for X in $(cat ${CLEAR_PATH} |sed "s/.*${TARGET_BOARD}//g"); do
 done
 
 if [[ `ls -1 | grep -c "armvirt"` -eq '0' ]]; then
-  rename -v "s/^openwrt/${Gujian_Date}-${SOURCE}-${LUCI_EDITION}-${LINUX_KERNEL}/" *
+  rename -v "s/^openwrt/${GUJIAN_DATE}-${SOURCE}-${LUCI_EDITION}-${LINUX_KERNEL}/" *
 fi
 sudo rm -rf "${CLEAR_PATH}"
 }
@@ -1909,16 +1909,16 @@ if [[ "${UPDATE_FIRMWARE_ONLINE}" == "true" ]] && [[ -z "${REPO_TOKEN}" ]]; then
 elif [[ "${UPDATE_FIRMWARE_ONLINE}" == "true" ]] && [[ -n "${REPO_TOKEN}" ]]; then
   echo
   TIME l "定时自动更新信息"
-  TIME z "插件版本: ${AutoUpdate_Version}"
+  TIME z "插件版本: ${AUTOUPDATE_VERSION}"
   if [[ ${TARGET_BOARD} == "x86" ]]; then
-    TIME b "传统固件: ${AutoBuild_Legacy}${Firmware_SFX}"
-    [[ "${EFI_NO}" == "1" ]] && TIME b "UEFI固件: ${AutoBuild_Uefi}${Firmware_SFX}"
+    TIME b "传统固件: ${AUTOBUILD_LEGACY}${FIRMWARE_SUFFIX}"
+    [[ "${EFI_NO}" == "1" ]] && TIME b "UEFI固件: ${AUTOBUILD_UEFI}${FIRMWARE_SUFFIX}"
   else
-    TIME b "固件名称: ${AutoBuild_Firmware}${Firmware_SFX}"
+    TIME b "固件名称: ${AUTOBUILD_FIRMWARE}${FIRMWARE_SUFFIX}"
   fi
-  TIME b "固件后缀: ${Firmware_SFX}"
-  TIME b "固件版本: ${Openwrt_Version}"
-  TIME b "云端路径: ${Github_Release}"
+  TIME b "固件后缀: ${FIRMWARE_SUFFIX}"
+  TIME b "固件版本: ${FIRMWARE_VERSION}"
+  TIME b "云端路径: ${GITHUB_RELEASE}"
   TIME g "《编译成功后，会自动把固件发布到指定地址，然后才会生成云端路径》"
   TIME g "《普通的那个发布固件跟云端的发布路径是两码事，如果你不需要普通发布的可以不用打开发布功能》"
   TIME g "修改IP、DNS、网关或者在线更新，请输入命令：openwrt"
