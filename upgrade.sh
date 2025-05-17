@@ -42,18 +42,8 @@ function Diy_Part2() {
 	fi
 	
 	case "${TARGET_BOARD}" in
-	ramips | reltek | ath* | ipq* | bmips | kirkwood | mediatek |bcm4908 |gemini |lantiq |layerscape |qualcommax |qualcommbe |siflower |silicon)
+	ramips | reltek | ath* | ipq* | bcm47xx | bmips | kirkwood | mediatek)
 		export FIRMWARE_SUFFIX=".bin"
-		export AUTOBUILD_FIRMWARE="${LUCI_EDITION}-${SOURCE}-${TARGET_PROFILE_ER}-${UPGRADE_DATE}-sysupgrade"
-	;;
- 	bcm47xx)
-		if [[ echo "${TARGET_PROFILE}" |grep -E "asus" ]]; then
-			export FIRMWARE_SUFFIX=".trx"
-		elif [[ echo "${TARGET_PROFILE}" |grep -E "netgear" ]]; then
-			export FIRMWARE_SUFFIX=".chk"
-		else
-			export FIRMWARE_SUFFIX=".bin"
-		fi
 		export AUTOBUILD_FIRMWARE="${LUCI_EDITION}-${SOURCE}-${TARGET_PROFILE_ER}-${UPGRADE_DATE}-sysupgrade"
 	;;
 	x86)
@@ -61,7 +51,7 @@ function Diy_Part2() {
 		export AUTOBUILD_UEFI="${LUCI_EDITION}-${SOURCE}-${TARGET_PROFILE_ER}-${UPGRADE_DATE}-uefi"
 		export AUTOBUILD_LEGACY="${LUCI_EDITION}-${SOURCE}-${TARGET_PROFILE_ER}-${UPGRADE_DATE}-legacy"
 	;;
-	rockchip | bcm27xx | mxs | sunxi | zynq |loongarch64 |omap |sifiveu |tegra)
+	rockchip | bcm27xx | mxs | sunxi | zynq)
 		export FIRMWARE_SUFFIX=".img.gz"
 		export AUTOBUILD_FIRMWARE="${LUCI_EDITION}-${SOURCE}-${TARGET_PROFILE_ER}-${UPGRADE_DATE}-legacy"
 	;;
@@ -74,15 +64,7 @@ function Diy_Part2() {
 		esac
 	;;
 	bcm53xx)
- 		if [[ echo "${TARGET_PROFILE}" |grep -E "|mr32\|tplink\|dlink" ]]; then
-			export FIRMWARE_SUFFIX=".bin"
-   		elif [[ echo "${TARGET_PROFILE}" |grep -E "luxul" ]]; then
-			export FIRMWARE_SUFFIX=".lxl"
-		elif [[ echo "${TARGET_PROFILE}" |grep -E "netgear" ]]; then
-			export FIRMWARE_SUFFIX=".chk"
-		else
-			export FIRMWARE_SUFFIX=".trx"
-		fi
+		export FIRMWARE_SUFFIX=".trx"
 		export AUTOBUILD_FIRMWARE="${LUCI_EDITION}-${SOURCE}-${TARGET_PROFILE_ER}-${UPGRADE_DATE}-sysupgrade"
 	;;
 	octeon | oxnas | pistachio)
@@ -165,14 +147,12 @@ function Diy_Part3() {
 			UP_ZHONGZHUAN="$(ls -1 |grep -Eo ".*${TARGET_PROFILE}.*sysupgrade.*${FIRMWARE_SUFFIX}" |grep -v "rootfs\|ext4\|factory\|kernel")"
 		elif [[ -n "$(ls -1 | grep -E 'squashfs')" ]]; then
 			UP_ZHONGZHUAN="$(ls -1 |grep -Eo ".*${TARGET_PROFILE}.*squashfs.*${FIRMWARE_SUFFIX}" |grep -v "rootfs\|ext4\|factory\|kernel")"
-   		elif [[ -n "$(ls -1 | grep -E 'combined')" ]]; then
-			UP_ZHONGZHUAN="$(ls -1 |grep -Eo ".*${TARGET_PROFILE}.*combined.*${FIRMWARE_SUFFIX}" |grep -v "rootfs\|ext4\|factory\|kernel")"
-      		elif [[ -n "$(ls -1 | grep -E 'sdcard')" ]]; then
-			UP_ZHONGZHUAN="$(ls -1 |grep -Eo ".*${TARGET_PROFILE}.*sdcard.*${FIRMWARE_SUFFIX}" |grep -v "rootfs\|ext4\|factory\|kernel")"
    		else
-     			echo "没找到在线升级可用的${FIRMWARE_SUFFIX}格式固件，或者没适配该机型"
+     			UP_ZHONGZHUAN="NO"
 		fi
-		if [[ -f "${UP_ZHONGZHUAN}" ]]; then
+		if [[ "${UP_ZHONGZHUAN}" == "NO" ]]; then
+			echo "没找到在线升级可用的${FIRMWARE_SUFFIX}格式固件，或者没适配该机型"
+		else
    			MD5="$(md5sum ${UP_ZHONGZHUAN} | cut -c1-3)$(sha256sum ${UP_ZHONGZHUAN} | cut -c1-3)"
 			cp -Rf "${UP_ZHONGZHUAN}" "${BIN_PATH}/${AUTOBUILD_FIRMWARE}-${MD5}${FIRMWARE_SUFFIX}"
 		fi
