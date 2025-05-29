@@ -20,8 +20,8 @@ function Diy_Part1() {
 function Diy_Part2() {
 	export UPDATE_TAG="Update-${TARGET_BOARD}"
 	export FILESETC_UPDATE="${HOME_PATH}/package/base-files/files/etc/openwrt_update"
-	export RELEASE_DOWNLOAD1="https://gh-proxy.com/${GITHUB_LINK}/releases/download/${UPDATE_TAG}"
-	export RELEASE_DOWNLOAD2="${GITHUB_LINK}/releases/download/${UPDATE_TAG}"
+	export GITHUB_PROXY="https://gh-proxy.com"
+	export RELEASE_DOWNLOAD="${GITHUB_LINK}/releases/download/${UPDATE_TAG}"
 	export GITHUB_RELEASE="${GITHUB_LINK}/releases/tag/${UPDATE_TAG}"
  	tee ${FILESETC_UPDATE} && chmod +x ${FILESETC_UPDATE}
         if ! curl -fsSL https://raw.githubusercontent.com/281677160/common/main/autoupdate/replace -o replace; then
@@ -94,15 +94,16 @@ function Diy_Part2() {
 
 
 	# 写入openwrt_update文件
-	echo "GITHUB_LINK=\"${GITHUB_LINK}\"" > ${FILESETC_UPDATE}
+	install -m 0755 /dev/null "${FILESETC_UPDATE}"
+	echo "GITHUB_LINK=\"${GITHUB_LINK}\"" >> ${FILESETC_UPDATE}
  	echo "FIRMWARE_VERSION=\"${FIRMWARE_VERSION}\"" >> ${FILESETC_UPDATE}
  	echo "LUCI_EDITION=\"${LUCI_EDITION}\"" >> ${FILESETC_UPDATE}
  	echo "SOURCE=\"${SOURCE}\"" >> ${FILESETC_UPDATE}
    	echo "DEVICE_MODEL=\"${TARGET_PROFILE_ER}\"" >> ${FILESETC_UPDATE}
  	echo "FIRMWARE_SUFFIX=\"${FIRMWARE_SUFFIX}\"" >> ${FILESETC_UPDATE}
  	echo "TARGET_BOARD=\"${TARGET_BOARD}\"" >> ${FILESETC_UPDATE}
- 	echo "RELEASE_DOWNLOAD1=\"${RELEASE_DOWNLOAD1}\"" >> ${FILESETC_UPDATE}
- 	echo "RELEASE_DOWNLOAD2=\"${RELEASE_DOWNLOAD2}\"" >> ${FILESETC_UPDATE}
+ 	echo "GITHUB_PROXY=\"${GITHUB_PROXY}\"" >> ${FILESETC_UPDATE}
+ 	echo "RELEASE_DOWNLOAD=\"${RELEASE_DOWNLOAD}\"" >> ${FILESETC_UPDATE}
 	cat replace >> ${FILESETC_UPDATE}
 }
 
