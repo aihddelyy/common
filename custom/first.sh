@@ -302,7 +302,7 @@ for X in $(find "operates" -name "settings.ini"); do
   sed -i '/CACHEWRTBUILD_SWITCH/d' "${X}"
   sed -i '/COMPILATION_INFORMATION/d' "${X}"
   sed -i '/UPDATE_FIRMWARE_ONLINE/d' "${X}"
-  sed -i '/KEEP_RELESAES/d' "${X}"
+  sed -i '/KEEP_RELEASES/d' "${X}"
   sed -i '/KEEP_WORKFLOWS/d' "${X}"
   sed -i '/COLLECTED_PACKAGES/d' "${X}"
   echo 'PACKAGING_FIRMWARE="true"           # 自动把Amlogic_Rockchip系列固件,打包成.img格式（true=开启）（false=关闭）' >> "${X}"
