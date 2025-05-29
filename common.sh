@@ -1652,7 +1652,7 @@ chmod -R +x ${start_path} && source ${start_path}
 if [[ "${CPU_SELECTION}" =~ (E5|false) ]]; then
   kaisbianyixx="编译"
 else
-  kaisbianyixx="${CPU_SELECTION}-编译"
+  kaisbianyixx="${CPU_SELECTION}编译"
 fi
 git clone https://user:${REPO_TOKEN}@github.com/${GIT_REPOSITORY}.git UPLOAD
 mkdir -p "UPLOAD/build/${FOLDER_NAME}/relevance"
