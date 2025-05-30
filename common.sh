@@ -1666,7 +1666,7 @@ else
   echo "获取变量失败,请勿胡乱修改compile.yml文件"
   exit 1
 fi
-cp -Rf ${HOME_PATH}/build_logo/config.txt UPLOAD/build/${FOLDER_NAME}/${CONFIG_FILE}
+cp -Rf ${HOME_PATH}/build_logo/config.txt UPLOAD/build/${FOLDER_NAME}/seed/${CONFIG_FILE}
 echo "${SOURCE}-${REPO_BRANCH}-${CONFIG_FILE}-$(date +%Y年%m月%d号%H时%M分%S秒)" > UPLOAD/build/${FOLDER_NAME}/relevance/start
 
 cd UPLOAD
