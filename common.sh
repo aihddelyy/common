@@ -33,7 +33,7 @@ fi
 if [[ -n "${INPUTS_REPO_BRANCH}" ]]; then
   SOURCE_CODE="${SOURCE_CODE}"
   REPO_BRANCH="${INPUTS_REPO_BRANCH}"
-  CONFIG_FILE="$(echo "${INPUTS_CONFIG_FILE}" |cut -d"/" -f2)"
+  CONFIG_FILE="${INPUTS_CONFIG_FILE}"
   INFORMATION_NOTICE="${INPUTS_INFORMATION_NOTICE}"
   UPLOAD_FIRMWARE="${INPUTS_UPLOAD_FIRMWARE}"
   UPLOAD_RELEASE="${INPUTS_UPLOAD_RELEASE}"
@@ -47,7 +47,7 @@ if [[ -n "${INPUTS_REPO_BRANCH}" ]]; then
 else
   SOURCE_CODE="${SOURCE_CODE}"
   REPO_BRANCH="${REPO_BRANCH}"
-  CONFIG_FILE="$(echo "${CONFIG_FILE}" |cut -d"/" -f2)"
+  CONFIG_FILE="${CONFIG_FILE}"
   INFORMATION_NOTICE="${INFORMATION_NOTICE}"
   UPLOAD_FIRMWARE="${UPLOAD_FIRMWARE}"
   UPLOAD_RELEASE="${UPLOAD_RELEASE}"
@@ -73,7 +73,7 @@ fi
 cat >"${start_path}" <<-EOF
 SOURCE_CODE="${SOURCE_CODE}"
 REPO_BRANCH="${REPO_BRANCH}"
-CONFIG_FILE="seed/${CONFIG_FILE}"
+CONFIG_FILE="${CONFIG_FILE}"
 INFORMATION_NOTICE="${INFORMATION_NOTICE}"
 UPLOAD_FIRMWARE="${UPLOAD_FIRMWARE}"
 UPLOAD_RELEASE="${UPLOAD_RELEASE}"
@@ -241,7 +241,7 @@ else
 fi
 
 # 检查自定义文件是否存在
-if [ -z "$(ls -A "${GITHUB_WORKSPACE}/${GIT_BUILD}/${CONFIG_FILE}" 2>/dev/null)" ]; then
+if [ -z "$(ls -A "${GITHUB_WORKSPACE}/${GIT_BUILD}/seed/${CONFIG_FILE}" 2>/dev/null)" ]; then
   TIME r "错误提示：编译脚本的[${FOLDER_NAME}文件夹内缺少${CONFIG_FILE}名称的配置文件],请在[${FOLDER_NAME}/seed]文件夹内补齐"
   echo
   exit 1
@@ -581,7 +581,7 @@ else
 fi
 ./scripts/feeds install -a > /dev/null 2>&1
 # 使用自定义配置文件
-[[ -f ${BUILD_PATH}/$CONFIG_FILE ]] && mv ${BUILD_PATH}/$CONFIG_FILE .config
+[[ -f ${BUILD_PATH}/seed/$CONFIG_FILE ]] && mv ${BUILD_PATH}/seed/$CONFIG_FILE .config
 }
 
 
