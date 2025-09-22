@@ -16,6 +16,7 @@ grep -q "OpenClash" /etc/opkg/distfeeds.conf && sed -i '/OpenClash/d' /etc/opkg/
 grep -q "helloworld" /etc/opkg/distfeeds.conf && sed -i '/helloworld/d' /etc/opkg/distfeeds.conf
 grep -q "passwall" /etc/opkg/distfeeds.conf && sed -i '/passwall/d' /etc/opkg/distfeeds.conf
 grep -q "openwrt_x" /etc/opkg/distfeeds.conf && sed -i '/openwrt_x/d' /etc/opkg/distfeeds.conf
+grep -q "momo" /etc/opkg/distfeeds.conf && sed -i '/momo/d' /etc/opkg/distfeeds.conf
 
 if [[ -f "/etc/networkdetection" ]] && [[ `grep -c "networkdetection" /etc/crontabs/root` -eq '0' ]]; then
 	rm -rf /etc/networkdetection
