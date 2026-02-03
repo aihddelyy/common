@@ -428,6 +428,14 @@ if [[ -d "${HOME_PATH}/feeds/danshui/relevance/nas-packages/multimedia/ffmpeg-re
   mv ${HOME_PATH}/feeds/danshui/relevance/nas-packages/multimedia/ffmpeg-remux ${HOME_PATH}/feeds/packages/multimedia/ffmpeg-remux
 fi
 
+# 解决rust报错
+if [ -d "${HOME_PATH}/feeds/packages/lang/rust" ]; then
+    echo "检测到 Rust 目录，正在删除..."
+    rm -rf ${HOME_PATH}/feeds/packages/lang/rust
+else
+    echo "Rust 目录不存在，跳过删除。"
+fi
+
 # tproxy补丁
 source ${HOME_PATH}/build/common/Share/tproxy/nft_tproxy.sh
 
