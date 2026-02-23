@@ -1,52 +1,50 @@
 #!/bin/sh
 
+# 1. 基础权限与环境初始化
 chmod -R 0755 /etc/init.d /usr/share
 touch /etc/crontabs/root
 
-ARCHIB="$(grep 'DISTRIB_ARCH' /etc/openwrt_release|cut -d= -f2|tr -d "'")"
-DISTRIBID="$(grep 'DISTRIB_ID' /etc/openwrt_release|cut -d= -f2|tr -d "'")"
-OPENWRT_RELEASE="$(grep 'OPENWRT_RELEASE' /usr/lib/os-release|cut -d= -f2|tr -d '"')"
-DISTRIB_DESCRIPTION="$(grep 'DISTRIB_DESCRIPTION' /etc/openwrt_release|cut -d= -f2|tr -d "'")"
+# 2. 获取系统基础信息
+ARCHIB="$(grep 'DISTRIB_ARCH' /etc/openwrt_release | cut -d= -f2 | tr -d "'")"
+DISTRIBID="$(grep 'DISTRIB_ID' /etc/openwrt_release | cut -d= -f2 | tr -d "'")"
+OPENWRT_RELEASE="$(grep 'OPENWRT_RELEASE' /usr/lib/os-release | cut -d= -f2 | tr -d '"')"
+DISTRIB_DESCRIPTION="$(grep 'DISTRIB_DESCRIPTION' /etc/openwrt_release | cut -d= -f2 | tr -d "'")"
+
+# 3. 杂项修复与调整
 #grep -q "x86_64" /etc/banner && sed -i "s?x86_64?$ARCHIB?g" /etc/banner
 #[[ "${DISTRIBID}" == "ImmortalWrt" ]] && sed -i "s?DISTRIB_ID='ImmortalWrt'?DISTRIB_ID='OpenWrt'?g" /etc/openwrt_release
 [[ -f "/usr/lib/lua/luci/controller/ttyd.lua" ]] && sed -i 's?services?system?g' "/usr/lib/lua/luci/controller/ttyd.lua"
-grep -q "danshui" /etc/opkg/distfeeds.conf && sed -i '/danshui/d' /etc/opkg/distfeeds.conf
-grep -q "dstheme" /etc/opkg/distfeeds.conf && sed -i '/dstheme/d' /etc/opkg/distfeeds.conf
-grep -q "OpenClash" /etc/opkg/distfeeds.conf && sed -i '/OpenClash/d' /etc/opkg/distfeeds.conf
-grep -q "helloworld" /etc/opkg/distfeeds.conf && sed -i '/helloworld/d' /etc/opkg/distfeeds.conf
-grep -q "passwall" /etc/opkg/distfeeds.conf && sed -i '/passwall/d' /etc/opkg/distfeeds.conf
-grep -q "openwrt_x" /etc/opkg/distfeeds.conf && sed -i '/openwrt_x/d' /etc/opkg/distfeeds.conf
-grep -q "momo" /etc/opkg/distfeeds.conf && sed -i '/momo/d' /etc/opkg/distfeeds.conf
-grep -q "danshui" /etc/apk/repositories.d/distfeeds.list && sed -i '/danshui/d' /etc/apk/repositories.d/distfeeds.list
-grep -q "dstheme" /etc/apk/repositories.d/distfeeds.list && sed -i '/dstheme/d' /etc/apk/repositories.d/distfeeds.list
-grep -q "OpenClash" /etc/apk/repositories.d/distfeeds.list && sed -i '/OpenClash/d' /etc/apk/repositories.d/distfeeds.list
-grep -q "helloworld" /etc/apk/repositories.d/distfeeds.list && sed -i '/helloworld/d' /etc/apk/repositories.d/distfeeds.list
-grep -q "passwall" /etc/apk/repositories.d/distfeeds.list && sed -i '/passwall/d' /etc/apk/repositories.d/distfeeds.list
-grep -q "openwrt_x" /etc/apk/repositories.d/distfeeds.list && sed -i '/openwrt_x/d' /etc/apk/repositories.d/distfeeds.list
-grep -q "momo" /etc/apk/repositories.d/distfeeds.list && sed -i '/momo/d' /etc/apk/repositories.d/distfeeds.list
 
-if [[ -f "/etc/networkdetection" ]] && [[ `grep -c "networkdetection" /etc/crontabs/root` -eq '0' ]]; then
-	rm -rf /etc/networkdetection
+# 4. 清理第三方冗余软件源 (使用 for 循环大幅精简代码)
+for keyword in danshui dstheme OpenClash helloworld passwall openwrt_x momo; do
+    sed -i "/${keyword}/d" /etc/opkg/distfeeds.conf 2>/dev/null
+    sed -i "/${keyword}/d" /etc/apk/repositories.d/distfeeds.list 2>/dev/null
+done
+
+# 5. 清理网络检测脚本残留 (使用现代化的 $() 语法)
+if [[ -f "/etc/networkdetection" ]] && [[ $(grep -c "networkdetection" /etc/crontabs/root 2>/dev/null) -eq 0 ]]; then
+    rm -rf /etc/networkdetection
 fi
 
+# 6. 个性化系统标识与 Banner
 if [[ -f "/usr/lib/os-release" ]]; then
-	#sed -i 's?RELEASE=".*"?RELEASE="Customized_Information @ OpenWrt"?g' /usr/lib/os-release
-	sed -i "s/RELEASE=\".*\"/RELEASE=\"$OPENWRT_RELEASE Customized_Information\"/g" /usr/lib/os-release
+    #sed -i 's?RELEASE=".*"?RELEASE="Customized_Information @ OpenWrt"?g' /usr/lib/os-release
+    sed -i "s/RELEASE=\".*\"/RELEASE=\"$OPENWRT_RELEASE Customized_Information\"/g" /usr/lib/os-release
 fi
 
 if [[ -f "/etc/banner" ]]; then
-	sed -i "s/BANNER/$DISTRIB_DESCRIPTION Customized_Information/g" /etc/banner
+    sed -i "s/BANNER/$DISTRIB_DESCRIPTION Customized_Information/g" /etc/banner
 fi
 
 if [[ -f "/etc/openwrt_release" ]]; then
-	sed -i "s/DESCRIPTION=\'.*\'/DESCRIPTION=\"$DISTRIB_DESCRIPTION Customized_Information\"/g" /etc/openwrt_release
+    sed -i "s/DESCRIPTION=\'.*\'/DESCRIPTION=\"$DISTRIB_DESCRIPTION Customized_Information\"/g" /etc/openwrt_release
 fi
 
+# 以下为被注释的个性化定制项 (保留以供日后参考)
 #if [[ -f "/usr/share/ucode/luci/version.uc" ]]; then
-#	sed -i '/export const revision/d' "/usr/share/ucode/luci/version.uc"
-#	echo "export const revision = 'ZHUJI_MING - LUCI_EDITION', branch = '';" >> "/usr/share/ucode/luci/version.uc"
+#   sed -i '/export const revision/d' "/usr/share/ucode/luci/version.uc"
+#   echo "export const revision = 'ZHUJI_MING - LUCI_EDITION', branch = '';" >> "/usr/share/ucode/luci/version.uc"
 #fi
-
 #sed -i '/DISTRIB_DESCRIPTION/d' /etc/openwrt_release
 #echo "DISTRIB_DESCRIPTION='Customized_Information @ OpenWrt '" >> /etc/openwrt_release
 #sed -i '/DISTRIB_SOURCECODE/d' /etc/openwrt_release
@@ -56,42 +54,48 @@ fi
 #sed -i '/luciname/d' /usr/lib/lua/luci/version.lua
 #echo "luciname    = \"ZHUJI_MING\"" >> /usr/lib/lua/luci/version.lua
 
+# 7. 核心换源逻辑 (采用最优版逻辑，同时兼容新老架构与双系统)
 opkg_mirror="https://mirrors.vsean.net/openwrt"
 distfeedlist="/etc/apk/repositories.d/distfeeds.list"
+opkgfeedlist="/etc/opkg/distfeeds.conf"
 
-# 情况一：针对较新的、采用 apk 包管理器的固件版本
-if [[ -f "${distfeedlist}" ]] && grep -qE "openwrt.org|immortalwrt.org" "${distfeedlist}" 2>/dev/null; then
-    sed -i.bak "s,http.*\/downloads.openwrt.org,$opkg_mirror,g; s,http.*\/downloads.immortalwrt.org,$opkg_mirror,g" "$distfeedlist"
-    grep -q "check_signature" /etc/opkg.conf && sed -i '/check_signature/d' /etc/opkg.conf
-
-# 情况二：针对老旧的 19.07 快照版本
-elif grep -q "19.07" /etc/opkg/distfeeds.conf 2>/dev/null && grep -qE "openwrt.org|immortalwrt.org" /etc/opkg/distfeeds.conf 2>/dev/null; then
-    sed -i.bak "s|http.*\/downloads.openwrt.org/releases/19.07-SNAPSHOT|https://mirrors.ustc.edu.cn/openwrt/releases/19.07.10|g; s|http.*\/downloads.immortalwrt.org/releases/19.07-SNAPSHOT|https://mirrors.ustc.edu.cn/openwrt/releases/19.07.10|g" /etc/opkg/distfeeds.conf
-    grep -q "check_signature" /etc/opkg.conf && sed -i '/check_signature/d' /etc/opkg.conf
-
-# 情况三：针对常规标准版本的 opkg 换源
-elif grep -qE "openwrt.org|immortalwrt.org" /etc/opkg/distfeeds.conf 2>/dev/null; then
-    sed -i.bak "s,http.*\/downloads.openwrt.org,$opkg_mirror,g; s,http.*\/downloads.immortalwrt.org,$opkg_mirror,g" /etc/opkg/distfeeds.conf
-    grep -q "check_signature" /etc/opkg.conf && sed -i '/check_signature/d' /etc/opkg.conf
+if [[ -f "${distfeedlist}" ]]; then
+    sed -i.bak "s,http.*\/downloads.openwrt.org,$opkg_mirror,g; s,http.*\/downloads.immortalwrt.org,$opkg_mirror,g" "${distfeedlist}"
+elif [[ -f "${opkgfeedlist}" ]]; then
+    if grep -q "19.07" "${opkgfeedlist}" 2>/dev/null; then
+        sed -i.bak "s|http.*\/downloads.openwrt.org/releases/19.07-SNAPSHOT|https://mirrors.ustc.edu.cn/openwrt/releases/19.07.10|g; s|http.*\/downloads.immortalwrt.org/releases/19.07-SNAPSHOT|https://mirrors.ustc.edu.cn/openwrt/releases/19.07.10|g" "${opkgfeedlist}"
+    else
+        sed -i.bak "s,http.*\/downloads.openwrt.org,$opkg_mirror,g; s,http.*\/downloads.immortalwrt.org,$opkg_mirror,g" "${opkgfeedlist}"
+    fi
 fi
 
-luci_web=/usr/lib/lua/luci/view/admin_status/index.htm
+# 统一关闭签名验证
+if [[ -f /etc/opkg.conf ]]; then
+    grep -q "check_signature" /etc/opkg.conf 2>/dev/null && sed -i '/check_signature/d' /etc/opkg.conf
+fi
+
+# 8. LuCI 网页端界面优化 (本地时间格式化与版本显示修复)
+luci_web="/usr/lib/lua/luci/view/admin_status/index.htm"
+
 if [[ -f '/etc/index.htm' ]]; then
-	sed -i 's#localtime  = .*#localtime  = os.date("%Y-%m-%d") .. " " .. os.date("%X") .. " " .. translate(os.date("%A")),#g' "/etc/index.htm"
-else
-	sed -i 's#localtime  = .*#localtime  = os.date("%Y-%m-%d") .. " " .. os.date("%X") .. " " .. translate(os.date("%A")),#g' "${luci_web}"
-fi
-if [[ -f '/etc/index.htm' ]] && [[ `grep -c "(<%=pcdata(ver.luciversion)%>)" "/etc/index.htm"` -eq '1' ]]; then
-	sed -i 's?(<%=pcdata(ver.luciversion)%>)?- <%=pcdata(ver.luciversion)%>?g' "/etc/index.htm"
-elif [[ `grep -c "(<%=pcdata(ver.luciversion)%>)" "${luci_web}"` -eq '1' ]]; then
-	sed -i 's?(<%=pcdata(ver.luciversion)%>)?- <%=pcdata(ver.luciversion)%>?g' "${luci_web}"
+    sed -i 's#localtime  = .*#localtime  = os.date("%Y-%m-%d") .. " " .. os.date("%X") .. " " .. translate(os.date("%A")),#g' "/etc/index.htm"
+elif [[ -f "${luci_web}" ]]; then
+    sed -i 's#localtime  = .*#localtime  = os.date("%Y-%m-%d") .. " " .. os.date("%X") .. " " .. translate(os.date("%A")),#g' "${luci_web}"
 fi
 
+if [[ -f '/etc/index.htm' ]] && [[ $(grep -c "(<%=pcdata(ver.luciversion)%>)" "/etc/index.htm" 2>/dev/null) -eq 1 ]]; then
+    sed -i 's?(<%=pcdata(ver.luciversion)%>)?- <%=pcdata(ver.luciversion)%>?g' "/etc/index.htm"
+elif [[ -f "${luci_web}" ]] && [[ $(grep -c "(<%=pcdata(ver.luciversion)%>)" "${luci_web}" 2>/dev/null) -eq 1 ]]; then
+    sed -i 's?(<%=pcdata(ver.luciversion)%>)?- <%=pcdata(ver.luciversion)%>?g' "${luci_web}"
+fi
+
+# 9. 修复终端登录时的警告居中对齐
 sed -i 's?=== WARNING! =====================================?=================== WARNING! =====================?g' /etc/profile
 
-lmo_file="$({ find "/usr/lib/lua/luci/i18n" |grep "zh_Hans.lmo"; } 2>"/dev/null")"
-for b in ${lmo_file}
-do
-	lmo_new_file="$(echo -e "$b"|sed "s/zh_Hans/zh-cn/g")"
-	[[ -f "$b" ]] && mv "$b" "${lmo_new_file}" 2>"/dev/null"
+# 10. 统一本地化语言文件包命名规范 (zh_Hans -> zh-cn)
+for b in $(find /usr/lib/lua/luci/i18n -name "*zh_Hans.lmo" 2>/dev/null); do
+    lmo_new_file="$(echo "$b" | sed 's/zh_Hans/zh-cn/g')"
+    mv "$b" "${lmo_new_file}" 2>/dev/null
 done
+
+echo "✅ 系统初始化配置完成！"
