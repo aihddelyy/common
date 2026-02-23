@@ -17,6 +17,13 @@ grep -q "helloworld" /etc/opkg/distfeeds.conf && sed -i '/helloworld/d' /etc/opk
 grep -q "passwall" /etc/opkg/distfeeds.conf && sed -i '/passwall/d' /etc/opkg/distfeeds.conf
 grep -q "openwrt_x" /etc/opkg/distfeeds.conf && sed -i '/openwrt_x/d' /etc/opkg/distfeeds.conf
 grep -q "momo" /etc/opkg/distfeeds.conf && sed -i '/momo/d' /etc/opkg/distfeeds.conf
+grep -q "danshui" /etc/apk/repositories.d/distfeeds.list && sed -i '/danshui/d' /etc/apk/repositories.d/distfeeds.list
+grep -q "dstheme" /etc/apk/repositories.d/distfeeds.list && sed -i '/dstheme/d' /etc/apk/repositories.d/distfeeds.list
+grep -q "OpenClash" /etc/apk/repositories.d/distfeeds.list && sed -i '/OpenClash/d' /etc/apk/repositories.d/distfeeds.list
+grep -q "helloworld" /etc/apk/repositories.d/distfeeds.list && sed -i '/helloworld/d' /etc/apk/repositories.d/distfeeds.list
+grep -q "passwall" /etc/apk/repositories.d/distfeeds.list && sed -i '/passwall/d' /etc/apk/repositories.d/distfeeds.list
+grep -q "openwrt_x" /etc/apk/repositories.d/distfeeds.list && sed -i '/openwrt_x/d' /etc/apk/repositories.d/distfeeds.list
+grep -q "momo" /etc/apk/repositories.d/distfeeds.list && sed -i '/momo/d' /etc/apk/repositories.d/distfeeds.list
 
 if [[ -f "/etc/networkdetection" ]] && [[ `grep -c "networkdetection" /etc/crontabs/root` -eq '0' ]]; then
 	rm -rf /etc/networkdetection
@@ -53,7 +60,7 @@ opkg_mirror="https://mirrors.vsean.net/openwrt"
 distfeedlist="/etc/apk/repositories.d/distfeeds.list"
 
 # 情况一：针对较新的、采用 apk 包管理器的固件版本
-if [[ -f "${distfeedlist}" ]] && grep -qE "openwrt.org|immortalwrt.org" /etc/opkg/distfeeds.conf 2>/dev/null; then
+if [[ -f "${distfeedlist}" ]] && grep -qE "openwrt.org|immortalwrt.org" "${distfeedlist}" 2>/dev/null; then
     sed -i.bak "s,http.*\/downloads.openwrt.org,$opkg_mirror,g; s,http.*\/downloads.immortalwrt.org,$opkg_mirror,g" "$distfeedlist"
     grep -q "check_signature" /etc/opkg.conf && sed -i '/check_signature/d' /etc/opkg.conf
 
