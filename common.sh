@@ -428,14 +428,6 @@ if [[ -d "${HOME_PATH}/feeds/danshui/relevance/nas-packages/multimedia/ffmpeg-re
   mv ${HOME_PATH}/feeds/danshui/relevance/nas-packages/multimedia/ffmpeg-remux ${HOME_PATH}/feeds/packages/multimedia/ffmpeg-remux
 fi
 
-# 解决rust报错
-#if [ -d "${HOME_PATH}/feeds/packages/lang/rust" ]; then
-#    echo "检测到 Rust 目录，正在删除..."
-#    rm -rf ${HOME_PATH}/feeds/packages/lang/rust
-#else
-#    echo "Rust 目录不存在，跳过删除。"
-#fi
-
 # tproxy补丁
 source ${HOME_PATH}/build/common/Share/tproxy/nft_tproxy.sh
 
@@ -890,6 +882,12 @@ fi
 if [[ ! -f "${HOME_PATH}/staging_dir/host/bin/upx" ]]; then
   cp -Rf /usr/bin/upx ${HOME_PATH}/staging_dir/host/bin/upx
   cp -Rf /usr/bin/upx-ucl ${HOME_PATH}/staging_dir/host/bin/upx-ucl
+fi
+
+if [[ -f "${HOME_PATH}/feeds/packages/lang/rust/Makefile" ]]; then
+  echo "正在执行：关闭 Rust 的 download-ci-llvm 选项，强制本地编译 LLVM"
+  sed -i 's/download-ci-llvm = true/download-ci-llvm = false/g' ${HOME_PATH}/feeds/packages/lang/rust/Makefile
+  sed -i 's/download-ci-llvm="true"/download-ci-llvm="false"/g' ${HOME_PATH}/feeds/packages/lang/rust/Makefile
 fi
 }
 
