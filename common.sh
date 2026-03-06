@@ -885,9 +885,8 @@ if [[ ! -f "${HOME_PATH}/staging_dir/host/bin/upx" ]]; then
 fi
 
 if [[ -f "${HOME_PATH}/feeds/packages/lang/rust/Makefile" ]]; then
-  echo "正在执行：关闭 Rust 的 download-ci-llvm 选项，强制本地编译 LLVM"
-  sed -i 's/download-ci-llvm = true/download-ci-llvm = false/g' ${HOME_PATH}/feeds/packages/lang/rust/Makefile
-  sed -i 's/download-ci-llvm="true"/download-ci-llvm="false"/g' ${HOME_PATH}/feeds/packages/lang/rust/Makefile
+  echo "正在执行：修改 Rust Makefile，关闭 download-ci-llvm 选项"
+  sed -i 's/--set=llvm.download-ci-llvm=true/--set=llvm.download-ci-llvm=false/g' ${HOME_PATH}/feeds/packages/lang/rust/Makefile
 fi
 }
 
