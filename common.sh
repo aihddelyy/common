@@ -1359,14 +1359,24 @@ else
 fi
 
 export KERNEL_PATCH="$(grep -Eo "KERNEL_PATCHVER.*[0-9.]+" "${HOME_PATH}/target/linux/${TARGET_BOARD}/Makefile" |grep -Eo "[0-9.]+")"
-export KERNEL_VERSINO="kernel-${KERNEL_PATCH}"
-if [[ -f "${HOME_PATH}/include/${KERNEL_VERSINO}" ]]; then
-  export LINUX_KERNEL="$(grep -Eo "LINUX_KERNEL_HASH-[0-9.]+" "${HOME_PATH}/include/${KERNEL_VERSINO}"  |grep -Eo "[0-9.]+")"
+export KERNEL_VERSION="kernel-${KERNEL_PATCH}"
+
+# 情况 1：适配最新的 25.12/Master 分支结构 (文件在 target/linux/generic/ 下)
+if [[ -f "${HOME_PATH}/target/linux/generic/${KERNEL_VERSION}" ]]; then
+  export LINUX_KERNEL="$(grep -Eo "LINUX_KERNEL_HASH-[0-9.]+" "${HOME_PATH}/target/linux/generic/${KERNEL_VERSION}" | grep -Eo "[0-9.]+")"
   [[ -z ${LINUX_KERNEL} ]] && export LINUX_KERNEL="nono"
+
+# 情况 2：适配较旧版本结构 (文件在 include/kernel-xxx 下)
+elif [[ -f "${HOME_PATH}/include/${KERNEL_VERSION}" ]]; then
+  export LINUX_KERNEL="$(grep -Eo "LINUX_KERNEL_HASH-[0-9.]+" "${HOME_PATH}/include/${KERNEL_VERSION}" | grep -Eo "[0-9.]+")"
+  [[ -z ${LINUX_KERNEL} ]] && export LINUX_KERNEL="nono"
+
+# 情况 3：适配过渡期结构 (文件在 include/kernel-version.mk 中)
 else
-  export LINUX_KERNEL="$(grep -Eo "LINUX_KERNEL_HASH-${KERNEL_PATCH}.[0-9]+" "${HOME_PATH}/include/kernel-version.mk" |grep -Eo "[0-9.]+")"
+  export LINUX_KERNEL="$(grep -Eo "LINUX_KERNEL_HASH-${KERNEL_PATCH}.[0-9]+" "${HOME_PATH}/include/kernel-version.mk" | grep -Eo "[0-9.]+")"
   [[ -z ${LINUX_KERNEL} ]] && export LINUX_KERNEL="nono"
 fi
+
 echo "LINUX_KERNEL=${LINUX_KERNEL}" >> ${GITHUB_ENV}
 }
 
