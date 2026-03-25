@@ -292,6 +292,9 @@ if [[ -n "${BENDI_VERSION}" ]]; then
   git pull > /dev/null 2>&1
 fi
 
+# 修复 danshui 源中 mosdns 的哈希校验问题
+find "${HOME_PATH}/feeds/danshui/" -path "*/mosdns/Makefile" | xargs -i sed -i 's/f4bfe53a63980698addb0505d706422e66df2ea44860bfc52dd8b837b3dc1c5c/0302a685db2a6c3c09af7bf4ff0dffd24f1e583383a47f064564f5270033671b/g' {}
+
 # 添加自定义插件源
 CLASH_FENZHIHAO="$(grep -E '^export OpenClash_branch=' $BUILD_PARTSH |cut -d '"' -f2)"
 if [[ "${CLASH_FENZHIHAO}" == "1" ]]; then
