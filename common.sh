@@ -418,7 +418,7 @@ fi
 # 更新golang和node版本
 gitsvn https://github.com/sbwml/packages_lang_golang ${HOME_PATH}/feeds/packages/lang/golang
 gitsvn https://github.com/sbwml/feeds_packages_lang_node-prebuilt ${HOME_PATH}/feeds/packages/lang/node
-#gitsvn https://github.com/openwrt/packages/tree/master/lang/rust ${HOME_PATH}/feeds/packages/lang/rust
+
 
 # store插件依赖
 if [[ -d "${HOME_PATH}/feeds/danshui/relevance/nas-packages/network/services" ]] && [[ ! -d "${HOME_PATH}//package/network/services/ddnsto" ]]; then
@@ -884,10 +884,10 @@ if [[ ! -f "${HOME_PATH}/staging_dir/host/bin/upx" ]]; then
   cp -Rf /usr/bin/upx-ucl ${HOME_PATH}/staging_dir/host/bin/upx-ucl
 fi
 
-if [[ -f "${HOME_PATH}/feeds/packages/lang/rust/Makefile" ]]; then
-  echo "正在执行：修改 Rust Makefile，关闭 download-ci-llvm 选项"
-  sed -i 's/--set=llvm.download-ci-llvm=true/--set=llvm.download-ci-llvm=false/g' ${HOME_PATH}/feeds/packages/lang/rust/Makefile
-fi
+#if [[ -f "${HOME_PATH}/feeds/packages/lang/rust/Makefile" ]]; then
+#  echo "正在执行：修改 Rust Makefile，关闭 download-ci-llvm 选项"
+#  sed -i 's/--set=llvm.download-ci-llvm=true/--set=llvm.download-ci-llvm=false/g' ${HOME_PATH}/feeds/packages/lang/rust/Makefile
+#fi
 }
 
 
