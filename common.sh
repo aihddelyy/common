@@ -330,6 +330,7 @@ fi
 echo "src-git danshui https://github.com/281677160/openwrt-package.git;$SOURCE" >> ${HOME_PATH}/feeds.conf.default
 echo "src-git dstheme https://github.com/281677160/openwrt-package.git;$THEME_BRANCH" >> ${HOME_PATH}/feeds.conf.default
 echo "src-git OpenClash https://github.com/vernesong/OpenClash.git;$CLASH_BRANCH" >> ${HOME_PATH}/feeds.conf.default
+echo "src-git momo https://github.com/nikkinikki-org/OpenWrt-momo.git;main" >> ${HOME_PATH}/feeds.conf.default
 
 # 增加中文语言包
 A_PATH="$HOME_PATH/package"
