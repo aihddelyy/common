@@ -326,6 +326,8 @@ else
   rm -rf ${HOME_PATH}/SRC_LUCI
   gitsvn https://github.com/jerrykuku/luci-theme-argon/tree/18.06 ${HOME_PATH}/package/themes/luci-theme-argon
 fi
+# 修复 Argon 主题 wget-any 编译报错
+sed -i 's/wget-any/wget-ssl/g' ${HOME_PATH}/package/themes/luci-theme-argon/Makefile
 
 echo "src-git danshui https://github.com/281677160/openwrt-package.git;$SOURCE" >> ${HOME_PATH}/feeds.conf.default
 echo "src-git dstheme https://github.com/281677160/openwrt-package.git;$THEME_BRANCH" >> ${HOME_PATH}/feeds.conf.default
