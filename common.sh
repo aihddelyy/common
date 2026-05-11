@@ -326,8 +326,11 @@ else
   rm -rf ${HOME_PATH}/SRC_LUCI
   gitsvn https://github.com/jerrykuku/luci-theme-argon/tree/18.06 ${HOME_PATH}/package/themes/luci-theme-argon
 fi
-# 修复 Argon 主题 wget-any 编译报错
-sed -i 's/wget-any/wget-ssl/g' ${HOME_PATH}/package/themes/luci-theme-argon/Makefile
+
+# 修复 Argon 主题 wget-any 编译报错 (仅在非 master 且不包含 25.12 的分支执行)
+if [[ "${REPO_BRANCH}" != "master" && "${REPO_BRANCH}" != *"25.12"* ]]; then
+  sed -i 's/wget-any/wget-ssl/g' ${HOME_PATH}/package/themes/luci-theme-argon/Makefile
+fi
 
 echo "src-git danshui https://github.com/281677160/openwrt-package.git;$SOURCE" >> ${HOME_PATH}/feeds.conf.default
 echo "src-git dstheme https://github.com/281677160/openwrt-package.git;$THEME_BRANCH" >> ${HOME_PATH}/feeds.conf.default
