@@ -420,10 +420,10 @@ if [[ ! -d "${HOME_PATH}/package/network/config/firewall4" ]]; then
     rm -rf ${HOME_PATH}/feeds/danshui/luci-app-homeproxy
 fi
 
-# 删除 feeds/danshui 内嵌的 mosdns 包（find -prune 跳过了此目录，需手动删除）
-# 泛匹配 ./feeds/danshui 下的任何 mosdns 目录（避免子目录位置变化导致漏删）
+# 删除 feeds/danshui 内嵌的 mosdns 和 v2ray-geodata 包（find -prune 跳过了此目录，需手动删除）
+# 泛匹配 ./feeds/danshui 下的任何 mosdns / v2ray-geodata 目录（避免子目录位置变化导致漏删）
 # 参考: https://github.com/281677160/openwrt-package/tree/Immortalwrt/luci-app-ssr-plus/mosdns
-find "${HOME_PATH}/feeds/danshui" -type d -name "mosdns" -exec rm -rf {} +
+find "${HOME_PATH}/feeds/danshui" -type d \( -name "mosdns" -o -name "v2ray-geodata" \) -exec rm -rf {} +
 
 
 # 使用sbwml的luci-app-mosdns替换源码自带的mosdns
