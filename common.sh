@@ -420,6 +420,17 @@ if [[ ! -d "${HOME_PATH}/package/network/config/firewall4" ]]; then
     rm -rf ${HOME_PATH}/feeds/danshui/luci-app-homeproxy
 fi
 
+# 删除 feeds/danshui 内嵌的 mosdns 包（find -prune 跳过了此目录，需手动删除）
+# 泛匹配 ./feeds/danshui 下的任何 mosdns 目录（避免子目录位置变化导致漏删）
+# 参考: https://github.com/281677160/openwrt-package/tree/Immortalwrt/luci-app-ssr-plus/mosdns
+find "${HOME_PATH}/feeds/danshui" -type d -name "mosdns" -exec rm -rf {} +
+
+
+# 使用sbwml的luci-app-mosdns替换源码自带的mosdns
+# 参考: https://github.com/sbwml/luci-app-mosdns
+gitsvn https://github.com/sbwml/luci-app-mosdns/tree/v5 ${HOME_PATH}/package/mosdns
+gitsvn https://github.com/sbwml/v2ray-geodata ${HOME_PATH}/package/v2ray-geodata
+
 
 # 更新golang和node版本
 gitsvn https://github.com/sbwml/packages_lang_golang ${HOME_PATH}/feeds/packages/lang/golang
@@ -985,9 +996,6 @@ EOF
 function Diy_prevent() {
 cd ${HOME_PATH}
 Diy_IPv6helper
-
-echo "正在执行：修复 mosdns 哈希值..."
-find "${HOME_PATH}/feeds/danshui/" -path "*/mosdns/Makefile" | xargs -i sed -i 's/f4bfe53a63980698addb0505d706422e66df2ea44860bfc52dd8b837b3dc1c5c/0302a685db2a6c3c09af7bf4ff0dffd24f1e583383a47f064564f5270033671b/g' {}
 
 echo "正在执行：判断插件有否冲突减少编译错误"
 make defconfig > /dev/null 2>&1
